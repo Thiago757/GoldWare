@@ -4,20 +4,14 @@ const express = require('express');
 const cors = require('cors');
 const pool = require('./src/config/database');
 
+const authRoutes = require('./src/api/auth');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/usuarios', async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT * FROM usuarios ORDER BY id');
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
-    res.status(500).json({ message: 'Erro no servidor' });
-  }
-});
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 3001;
 
