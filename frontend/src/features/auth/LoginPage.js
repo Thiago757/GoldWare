@@ -92,7 +92,7 @@ function LoginPage() {
                             </div>
                         </div>
 
-                        <a href="#" className="forgot-password-link">Esqueceu sua senha?</a>
+                        <a href="/esqueceu-senha" className="forgot-password-link">Esqueceu sua senha?</a>
 
                         {error && <p className="login-error">{error}</p>}
                         
