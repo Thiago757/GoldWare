@@ -17,7 +17,7 @@ exports.login = async (req, res) => {
         const user = userQuery.rows[0];
 
         if (!user) {
-            return res.status(401).json({ message: 'Credenciais inválidas.' });
+            return res.status(401).json({ message: 'Email ou senha inválidos.' });
         }
 
     // console.log("\n--- DEBUG DE COMPARAÇÃO DE SENHA ---");
@@ -34,8 +34,8 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id_usuario, email: user.email },
-            'SEGREDO_SUPER_SECRETO_PARA_PROJETO_GOLDWARE', 
+            { userId: user.id_usuario, nome: user.nome, email: user.email, tipo: user.tipo },
+            process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
 

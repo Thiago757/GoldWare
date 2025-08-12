@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+import { AuthContext } from '../../context/AuthContext';
 
 import visibilityIcon from '../../assets/login/visibility.svg';
 import visibilityoffIcon from '../../assets/login/off-visibility.svg';
@@ -11,6 +12,7 @@ function LoginPage() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const { login } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -32,13 +34,10 @@ function LoginPage() {
             const data = await response.json();
 
               if (!response.ok) { 
-
-                if (response.status === 401) {
-                    throw new Error('Email ou senha estão inválidos.'); 
-                }
-                
-                throw new Error(data.message || 'Ocorreu um erro no servidor.');
+                throw new Error(data.message || 'Email ou senha estão inválidos.');
             }
+
+            login(data.token);
 
             navigate('/dashboard');
 

@@ -1,0 +1,202 @@
+.sidebar {
+    width: 260px;
+    background-color: #fff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e2e8f0;
+    padding: 20px;
+}
+
+.sidebar-header {
+    margin-bottom: 30px;
+}
+
+.sidebar-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #fde047;
+    color: #422006;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.profile-info strong {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.profile-info span {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.sidebar-nav {
+    flex-grow: 1;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav li a:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.sidebar-nav li.active a {
+    background-color: #fde047;
+    color: #422006;
+}
+
+.sidebar-nav li a svg {
+    font-size: 20px;
+}
+
+
+.sidebar-button-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-button-link:hover {
+    background-color: #f1f5f9;
+    color: #1e2d3b;
+}
+
+.sidebar-button-link svg {
+    font-size: 20px;
+}
+
+.profile-section-wrapper {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+}
+
+.profile-info {
+    flex-grow: 1; 
+}
+
+.profile-menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-menu-button:hover {
+    background-color: #e2e8f0;
+}
+
+.profile-menu-button svg {
+    font-size: 20px;
+    color: #64748b;
+}
+
+.profile-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    overflow: hidden;
+    padding: 5px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.profile-dropdown-menu ul {
+    list-style: none;
+}
+
+.profile-dropdown-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    transition: all 0.2s ease;
+}
+
+.profile-dropdown-menu li a:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
