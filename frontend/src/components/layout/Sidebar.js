@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 import { AuthContext } from '../../context/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
@@ -18,10 +18,9 @@ const getInitials = (name = '') => {
 function Sidebar() {
     const { user, logout } = useContext(AuthContext); 
     const [isMenuOpen, setMenuOpen] = useState(false);
-    
     const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
-    
     const menuRef = useRef(null);
+    const location = useLocation();
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -45,7 +44,7 @@ function Sidebar() {
         setLogoutModalOpen(false);
     };
 
-    return (
+     return (
         <>
             <aside className="sidebar">
                 <div className="sidebar-header">
@@ -83,13 +82,27 @@ function Sidebar() {
 
                 <nav className="sidebar-nav">
                     <ul>
-                        <li className="active"><Link to="/dashboard"><RxDashboard /> Dashboard</Link></li>
-                        <li><Link to="/vendas"><CiShoppingTag /> Vendas</Link></li>
-                        <li><Link to="/estoque"><BsBoxSeam /> Estoque</Link></li>
-                        <li><Link to="/movimentacoes"><BsArrowLeftRight /> Movimentações</Link></li>
-                        <li><Link to="/clientes"><CiUser /> Clientes</Link></li>
-                        <li><Link to="/fornecedores"><CiDeliveryTruck /> Fornecedores</Link></li>
-                        <li><Link to="/pagamentos"><CiMoneyBill /> Pagamentos</Link></li>
+                        <li className={location.pathname === '/dashboard' ? 'active' : ''}>
+                            <Link to="/dashboard"><RxDashboard /> Dashboard</Link>
+                        </li>
+                        <li className={location.pathname === '/vendas' ? 'active' : ''}>
+                            <Link to="/vendas"><CiShoppingTag /> Vendas</Link>
+                        </li>
+                        <li className={location.pathname === '/estoque' ? 'active' : ''}>
+                            <Link to="/estoque"><BsBoxSeam /> Estoque</Link>
+                        </li>
+                        <li className={location.pathname === '/movimentacoes' ? 'active' : ''}>
+                            <Link to="/movimentacoes"><BsArrowLeftRight /> Movimentações</Link>
+                        </li>
+                        <li className={location.pathname === '/clientes' ? 'active' : ''}>
+                            <Link to="/clientes"><CiUser /> Clientes</Link>
+                        </li>
+                        <li className={location.pathname === '/fornecedores' ? 'active' : ''}>
+                            <Link to="/fornecedores"><CiDeliveryTruck /> Fornecedores</Link>
+                        </li>
+                        <li className={location.pathname === '/pagamentos' ? 'active' : ''}>
+                            <Link to="/pagamentos"><CiMoneyBill /> Pagamentos</Link>
+                        </li>
                     </ul>
                 </nav>
 

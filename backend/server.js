@@ -2,16 +2,23 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const router = express.Router();
 const pool = require('./src/config/database');
 
 const authRoutes = require('./src/api/auth');
+const produtoRoutes = require('./src/api/produtos'); 
+const dashboardRoutes = require('./src/api/dashboard');
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/produtos', produtoRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 const PORT = process.env.PORT || 3001;
 
