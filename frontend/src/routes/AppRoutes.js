@@ -6,7 +6,8 @@ import DashboardPage from '../features/dashboard/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import ForgotPasswordPage from '../features/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../features/auth/ResetPasswordPage';
-import VendasPage from '../features/vendas/VendasPage';
+import VendasListPage from '../features/vendas/VendasListPage';
+import PDVPage from '../features/vendas/PDVPage';
 import EstoquePage from '../features/estoque/EstoquePage';
 import MovimentacoesPage from '../features/movimentacoes/MovimentacoesPage';
 import ClientesPage from '../features/clientes/ClientesPage';
@@ -30,7 +31,8 @@ function AppRoutes() {
                     </ProtectedRoute>
                 } 
             />
-            <Route path="/vendas" element={<ProtectedRoute><VendasPage /></ProtectedRoute>} />
+            <Route path="/vendas" element={<ProtectedRoute><VendasListPage /></ProtectedRoute>} />
+            <Route path="/vendas/nova" element={<ProtectedRoute><PDVPage /></ProtectedRoute>} />
             <Route path="/estoque" element={<ProtectedRoute><EstoquePage /></ProtectedRoute>} />
             <Route path="/movimentacoes" element={<ProtectedRoute><MovimentacoesPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />

@@ -2,38 +2,56 @@ import React, { createContext, useState } from 'react';
 
 export const VendaContext = createContext(null);
 
+const initialState = {
+    cliente: null,
+    itens: [],
+};
+
 export const VendaProvider = ({ children }) => {
-    const [itensVenda, setItensVenda] = useState([]);
+    const [vendaAtiva, setVendaAtiva] = useState(initialState);
+
+    const iniciarNovaVenda = (cliente) => {
+        setVendaAtiva({ cliente: cliente, itens: [] });
+    };
 
     const addItem = (produto) => {
-        setItensVenda(prevItens => {
-            const itemExistente = prevItens.find(item => item.id_produto === produto.id_produto);
+        setVendaAtiva(prevVenda => {
+            const itemExistente = prevVenda.itens.find(item => item.id_produto === produto.id_produto);
+            let novosItens;
             if (itemExistente) {
-                return prevItens.map(item =>
+                novosItens = prevVenda.itens.map(item =>
                     item.id_produto === produto.id_produto
                         ? { ...item, quantidade: item.quantidade + 1 }
                         : item
                 );
             } else {
-                return [...prevItens, { ...produto, quantidade: 1 }];
+                novosItens = [...prevVenda.itens, { ...produto, quantidade: 1 }];
             }
+            return { ...prevVenda, itens: novosItens };
         });
     };
 
     const removeItem = (idProdutoParaRemover) => {
-        setItensVenda(prevItens => prevItens.filter(item => item.id_produto !== idProdutoParaRemover));
+        setVendaAtiva(prevVenda => ({
+            ...prevVenda,
+            itens: prevVenda.itens.filter(item => item.id_produto !== idProdutoParaRemover)
+        }));
     };
 
     const removeMultipleItems = (idsParaRemover) => {
-        setItensVenda(prevItens => prevItens.filter(item => !idsParaRemover.includes(item.id_produto)));
+        setVendaAtiva(prevVenda => ({
+            ...prevVenda,
+            itens: prevVenda.itens.filter(item => !idsParaRemover.includes(item.id_produto))
+        }));
     };
 
     const clearVenda = () => {
-        setItensVenda([]);
+        setVendaAtiva(initialState);
     };
 
     const value = {
-        itensVenda,
+        vendaAtiva,
+        iniciarNovaVenda,
         addItem,
         removeItem,
         removeMultipleItems,

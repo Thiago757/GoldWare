@@ -1,0 +1,144 @@
+.vendas-list-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.vendas-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.vendas-list-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+}
+
+.nova-venda-btn {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nova-venda-btn:hover {
+    background-color: #15803d;
+}
+
+.filtros-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px 25px;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+}
+
+.filtro-input {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background-color: #fff;
+    background-color: #fff;
+    font-size: 0.9rem;
+    color: #334155;
+    height: 42px;
+}
+
+.react-datepicker-wrapper input {
+    width: 150px;
+}
+
+.filtrar-btn {
+    background-color: #334155;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    height: 42px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filtrar-btn:hover {
+    background-color: #1e293b;
+}
+
+.vendas-table-container {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.vendas-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vendas-table-container th,
+.vendas-table-container td {
+    text-align: left;
+    padding: 15px 25px;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;
+}
+
+.vendas-table-container th {
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    background-color: #f8fafc;
+}
+
+.vendas-table-container tr:last-child td {
+    border-bottom: none;
+}
+
+.vendas-table-container tr:hover {
+    background-color: #f8fafc;
+}
+
+.cancelar-venda-icon-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.cancelar-venda-icon-btn:hover {
+    color: #ef4444;
+}
+
+.cancelar-venda-icon-btn:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.status-pago, .status-pendente, .status-cancelado, .status-default {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pago { background-color: #dcfce7; color: #166534; }
+.status-pendente { background-color: #fef9c3; color: #854d0e; }
+.status-cancelado { background-color: #fee2e2; color: #991b1b; }
+.status-default { background-color: #e2e8f0; color: #475569; }

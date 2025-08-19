@@ -1,0 +1,213 @@
+.vendas-container {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: auto 1fr;
+    gap: 20px;
+    height: calc(100vh - 40px);
+}
+
+.pdv-header {
+    grid-column: 1 / -1;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.pdv-header h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.pdv-principal {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    grid-row: 2;
+}
+
+.scan-form { margin-bottom: 20px; }
+.scan-form label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+.scan-form input {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+}
+.scan-form input:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
+}
+
+.itens-lista {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+.itens-lista table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.itens-lista th, .itens-lista td {
+    padding: 16px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.itens-lista th {
+    background-color: #f8fafc;
+    position: sticky;
+    top: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.itens-lista tr:last-child td {
+    border-bottom: none;
+}
+.itens-lista tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.pdv-resumo {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    grid-row: 2;
+}
+
+.pdv-resumo h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.resumo-detalhes {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+.resumo-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    color: #475569;
+}
+.resumo-linha span:last-child {
+    font-weight: 600;
+    color: #1e293b;
+}
+.desconto-linha label {
+    font-weight: 600;
+}
+.desconto-linha input {
+    width: 80px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    text-align: right;
+    font-size: 1rem;
+    font-weight: bold;
+}
+.desconto-linha input:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
+}
+
+.remover-item-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.remover-item-btn:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.total-display {
+    background-color: #fde047;
+    color: #422006;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.total-display span { display: block; font-size: 1rem; font-weight: 500; }
+.total-display strong { display: block; font-size: 2.5rem; font-weight: 700; }
+
+.finalizar-venda-btn {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: auto;
+    transition: background-color 0.2s;
+}
+.finalizar-venda-btn:hover {
+    background-color: #15803d;
+}
+
+.cancelar-venda-btn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+.cancelar-venda-btn:hover {
+    background-color: #dc2626;
+}
+
+.remover-selecionados-btn {
+    margin-top: 15px;
+    padding: 10px 15px;
+    border: 1px solid #f87171;
+    color: #b91c1c;
+    background-color: #fee2e2; 
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.remover-selecionados-btn:hover {
+    background-color: #ef4444; 
+    color: white;
+    border-color: #ef4444;
+}

@@ -9,6 +9,8 @@ const pool = require('./src/config/database');
 const authRoutes = require('./src/api/auth');
 const produtoRoutes = require('./src/api/produtos'); 
 const dashboardRoutes = require('./src/api/dashboard');
+const vendaRoutes = require('./src/api/vendas');
+const clienteRoutes = require('./src/api/clientes');
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/produtos', produtoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/vendas', vendaRoutes);
+app.use('/api/clientes', clienteRoutes);
 
 const PORT = process.env.PORT || 3001;
 
