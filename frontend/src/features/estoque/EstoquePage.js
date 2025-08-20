@@ -13,7 +13,7 @@ function EstoquePage() {
 
     const fetchProdutos = async () => {
         if (!token) return;
-        setLoading(true); 
+        setLoading(true);
         try {
             const response = await fetch('http://localhost:3001/api/produtos', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -42,42 +42,52 @@ function EstoquePage() {
         setModalOpen(true);
     };
 
-    const handleSalvarProduto = async (formData, imagemFile) => {
-        try {
-            let produtoSalvo;
-            if (formData.id_produto) {
-                console.log("Editando produto:", formData);
-                produtoSalvo = formData;
-            } else {
-                const response = await fetch('http://localhost:3001/api/produtos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(formData)
-                });
-                if (!response.ok) throw new Error('Falha ao cadastrar produto.');
-                produtoSalvo = await response.json();
-            }
+   const handleSalvarProduto = async (formData, imagemFile) => {
+    try {
+        const dataToSend = new FormData();
+        Object.keys(formData).forEach(key => {
+            if (key !== 'id_produto') dataToSend.append(key, formData[key]);
+        });
+        if (imagemFile) dataToSend.append('imagem', imagemFile);
 
-            if (imagemFile && produtoSalvo.id_produto) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('imagem', imagemFile);
+        let produtoSalvo;
 
-                const uploadResponse = await fetch(`http://localhost:3001/api/produtos/${produtoSalvo.id_produto}/upload-image`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: uploadFormData
-                });
-                if (!uploadResponse.ok) throw new Error('Falha ao enviar imagem.');
-            }
-
-            setModalOpen(false); 
-            fetchProdutos();
-
-        } catch (error) {
-            console.error("Erro ao salvar produto:", error);
-            alert(`Erro: ${error.message}`);
+        if (formData.id_produto) {
+            const response = await fetch(`http://localhost:3001/api/produtos/${formData.id_produto}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(formData) 
+            });
+            if (!response.ok) throw new Error('Falha ao editar produto.');
+            produtoSalvo = await response.json();
+        } else {
+            const response = await fetch('http://localhost:3001/api/produtos', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: dataToSend
+            });
+            if (!response.ok) throw new Error('Falha ao cadastrar produto.');
+            produtoSalvo = await response.json();
         }
-    };
+
+        if (imagemFile && produtoSalvo.id_produto) {
+            const uploadFormData = new FormData();
+            uploadFormData.append('imagem', imagemFile);
+            await fetch(`http://localhost:3001/api/produtos/${produtoSalvo.id_produto}/upload-image`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: uploadFormData
+            });
+        }
+
+        setModalOpen(false);
+        fetchProdutos();
+
+    } catch (error) {
+        console.error("Erro ao salvar produto:", error);
+        alert(`Erro: ${error.message}`);
+    }
+};
 
     const handleUpdateStatus = async (produto) => {
         const novoStatus = produto.ativo === 'S' ? 'N' : 'S';

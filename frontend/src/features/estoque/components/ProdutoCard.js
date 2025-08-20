@@ -7,10 +7,14 @@ function ProdutoCard({ produto, onEdit, onToggleStatus }) {
     const precoFormatado = `R$ ${parseFloat(produto.preco_venda).toFixed(2)}`;
     const statusClasse = produto.ativo === 'S' ? 'ativo' : 'inativo';
 
+    const imageUrl = produto.imagem_url 
+        ? `${process.env.REACT_APP_API_BASE_URL}${produto.imagem_url}` 
+        : placeholderImage;
+    
     return (
         <div className="produto-card">
             <div className="produto-imagem-container">
-                <img src={produto.imagem_url || placeholderImage} alt={produto.nome} />
+                <img src={imageUrl} alt={produto.nome} />
                 <span className={`status-badge ${statusClasse}`}>
                     {produto.ativo === 'S' ? 'Ativo' : 'Inativo'}
                 </span>
@@ -25,7 +29,6 @@ function ProdutoCard({ produto, onEdit, onToggleStatus }) {
             </div>
             <div className="produto-acoes">
                 <button onClick={onEdit} className="edit-btn">Editar</button>
-                
                 <div className="toggle-switch">
                     <input 
                         type="checkbox" 

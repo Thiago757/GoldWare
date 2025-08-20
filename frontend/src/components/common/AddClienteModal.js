@@ -27,7 +27,6 @@ function AddClienteModal({ isOpen, onClose, onClientSaved }) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message);
 
-           
             onClientSaved(data.cliente);
             handleClose();
         } catch (err) {
@@ -66,8 +65,10 @@ function AddClienteModal({ isOpen, onClose, onClientSaved }) {
                     <label htmlFor="endereco">Endereço</label>
                     <input id="endereco" type="text" value={endereco} onChange={e => setEndereco(e.target.value)} />
                 </div>
-                {error && <p className="login-error" style={{textAlign: 'center'}}>{error}</p>}
-                <div className="modal-actions">
+
+                {error && <p className="login-error" style={{textAlign: 'center', marginTop: '15px'}}>{error}</p>}
+                
+                <div className="modal-actions" style={{marginTop: '20px'}}>
                     <button type="button" onClick={handleClose} className="modal-button cancel">Cancelar</button>
                     <button type="submit" className="modal-button confirm">Salvar Cliente</button>
                 </div>

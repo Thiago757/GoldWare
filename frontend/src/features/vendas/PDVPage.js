@@ -11,7 +11,6 @@ function PDVPage() {
     const { vendaAtiva, addItem, removeItem, removeMultipleItems, clearVenda } = useContext(VendaContext);
     const { token } = useContext(AuthContext);
     const navigate = useNavigate();
-
     const [codigoLido, setCodigoLido] = useState('');
     const [subtotal, setSubtotal] = useState(0);
     const [desconto, setDesconto] = useState(0);
@@ -25,7 +24,7 @@ function PDVPage() {
 
     useEffect(() => {
         if (!vendaAtiva.cliente) {
-            console.warn("Nenhum cliente selecionado, redirecionando.");
+            console.warn("Nenhum cliente selecionado, redirecionando para a lista de vendas.");
             navigate('/vendas');
         }
         if (inputRef.current) {
@@ -36,17 +35,20 @@ function PDVPage() {
     useEffect(() => {
         const novoSubtotal = vendaAtiva.itens.reduce((acc, item) => acc + (item.preco_venda * item.quantidade), 0);
         setSubtotal(novoSubtotal);
-
         const valorDescontoNumerico = Number(desconto) || 0;
-        const valorDesconto = novoSubtotal * (valorDescontoNumerico / 100);
-        setTotal(novoSubtotal - valorDesconto);
+        const valorDoDesconto = novoSubtotal * (valorDescontoNumerico / 100);
+        setTotal(novoSubtotal - valorDoDesconto);
     }, [vendaAtiva.itens, desconto]);
 
     const handleScan = async (e) => {
         e.preventDefault();
         if (!codigoLido) return;
         try {
-            const response = await fetch(`http://localhost:3001/api/produtos/barcode/${codigoLido}`);
+            const response = await fetch(`http://localhost:3001/api/produtos/barcode/${codigoLido}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const produto = await response.json();
             if (!response.ok) throw new Error(produto.message || 'Produto não encontrado.');
             addItem(produto);
@@ -111,7 +113,7 @@ function PDVPage() {
             desconto: Number(desconto) || 0,
             valor_total: total,
             itens: vendaAtiva.itens.map(item => ({ id_produto: item.id_produto, quantidade: item.quantidade, preco_unitario: item.preco_venda, nome: item.nome })),
-            pagamentos: dadosPagamento.pagamentos.map(p => ({ forma: p.forma, valor: p.valor, parcelas: p.parcelas || null }))
+            pagamentos: dadosPagamento.pagamentos.map(p => ({ forma: p.forma, valor: p.valor, parcelas: p.parcelas || 1 }))
         };
 
         try {
@@ -177,24 +179,12 @@ function PDVPage() {
                     <div className="total-display"><span>TOTAL</span><strong>R$ {total.toFixed(2)}</strong></div>
                     <div className="resumo-detalhes">
                         <div className="resumo-linha"><span>Subtotal</span><span>R$ {subtotal.toFixed(2)}</span></div>
-                        <div className="resumo-linha desconto-linha">
-                            <label htmlFor="desconto-input">Desconto (%)</label>
-                            <input
-                                id="desconto-input"
-                                type="number"
-                                value={desconto}
-                                onChange={handleDescontoChange}
-                                placeholder="0"
-                                min="0"
-                                max="100"
-                            />
-                        </div>
+                        <div className="resumo-linha desconto-linha"><label htmlFor="desconto-input">Desconto (%)</label><input id="desconto-input" type="number" value={desconto} onChange={handleDescontoChange} placeholder="0" min="0" max="100"/></div>
                     </div>
                     <button onClick={() => setPagamentoModalOpen(true)} className="finalizar-venda-btn" style={{ marginTop: 'auto' }} disabled={vendaAtiva.itens.length === 0}>Finalizar Venda</button>
                     <button onClick={() => setModalAberto('cancel')} className="cancelar-venda-btn">Cancelar Venda</button>
                 </div>
             </div>
-            {/* ... Seus modais aqui ... */}
             <ConfirmationModal isOpen={modalAberto === 'single'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaRemoverItem} title="Remover Item" message={`Tem certeza que deseja remover o item "${itemParaRemover?.nome}" da venda?`} />
             <ConfirmationModal isOpen={modalAberto === 'multiple'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaRemoverSelecionados} title="Remover Itens Selecionados" message={`Tem certeza que deseja remover os ${itensSelecionados.length} itens selecionados?`} />
             <ConfirmationModal isOpen={modalAberto === 'cancel'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaCancelarVenda} title="Cancelar Venda" message="Tem certeza que deseja cancelar a venda? Todos os itens serão removidos." />

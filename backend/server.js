@@ -1,11 +1,8 @@
 require('dotenv').config(); 
 
-// Imports de pacotes externos
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-
-// Imports locais
 const pool = require('./src/config/database');
 const authRoutes = require('./src/api/auth');
 const produtoRoutes = require('./src/api/produtos'); 
@@ -14,11 +11,13 @@ const vendaRoutes = require('./src/api/vendas');
 const clienteRoutes = require('./src/api/clientes');
 const pagamentoRoutes = require('./src/api/pagamentos');
 const app = express();
+const path = require('path');
 
-app.use(helmet());
+
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads')); 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/produtos', produtoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
