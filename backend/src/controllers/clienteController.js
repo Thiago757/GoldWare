@@ -22,15 +22,14 @@ exports.createCliente = async (req, res) => {
     try {
         const { nome, email, cpf, telefone, endereco } = req.body;
 
-        
-        if (!nome) {
-            return res.status(400).json({ message: 'O nome do cliente é obrigatório.' });
+        if (!nome || !email || !cpf || !telefone || !endereco) {
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
         }
 
         const novoClienteQuery = await pool.query(
             `INSERT INTO clientes (nome, email, cpf, telefone, endereco) 
              VALUES ($1, $2, $3, $4, $5) 
-             RETURNING id_cliente, nome`, 
+             RETURNING id_cliente, nome`,
             [nome, email, cpf, telefone, endereco]
         );
 

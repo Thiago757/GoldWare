@@ -7,3 +7,46 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
+
+.filtros-container-estoque {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.filtro-input-estoque {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 1rem;
+    height: 42px;
+}
+
+.filtro-input-estoque.nome {
+    width: 100%;
+    max-width: 400px;
+}
+
+.filtro-input-estoque.status {
+    width: 150px;
+}
+
+.filtro-input-estoque[type="text"] {
+    flex-grow: 1; 
+}
+
+.filtrar-btn-estoque {
+    background-color: #334155;
+    color: white;
+    border: none;
+    padding: 0 25px;
+    height: 42px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}

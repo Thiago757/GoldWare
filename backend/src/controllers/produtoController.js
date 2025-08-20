@@ -5,9 +5,33 @@ const path = require('path');
 
 exports.listarProdutos = async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM produtos ORDER BY nome ASC');
+        const { nome, ativo } = req.query;
+
+        let query = 'SELECT * FROM produtos';
+        const params = [];
+        const conditions = [];
+
+        if (nome) {
+            params.push(`%${nome}%`);
+            conditions.push(`nome ILIKE $${params.length}`);
+        }
+
+        if (ativo) {
+            params.push(ativo);
+            conditions.push(`ativo = $${params.length}`);
+        }
+
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+
+        query += ' ORDER BY nome ASC';
+
+        const result = await pool.query(query, params);
         res.status(200).json(result.rows);
+
     } catch (error) {
+        console.error("Erro ao listar produtos:", error);
         res.status(500).json({ message: 'Erro no servidor.', error });
     }
 };
