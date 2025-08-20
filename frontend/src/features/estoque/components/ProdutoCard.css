@@ -1,0 +1,21 @@
+.produto-card { display: flex; flex-direction: column; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.produto-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+.produto-imagem-container { position: relative; width: 100%; height: 200px; }
+.produto-imagem-container img { width: 100%; height: 100%; object-fit: cover; }
+.status-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+.status-badge.ativo { background-color: #dcfce7; color: #166534; }
+.status-badge.inativo { background-color: #fee2e2; color: #991b1b; }
+.produto-info { padding: 15px; flex-grow: 1; }
+.produto-categoria { font-size: 0.8rem; color: #64748b; margin-bottom: 5px; display: block; }
+.produto-nome { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 10px; }
+.produto-preco { font-size: 1.3rem; font-weight: 700; color: #facc15; margin-bottom: 15px; }
+.produto-estoque { font-size: 0.9rem; color: #475569; }
+.produto-acoes { padding: 15px; border-top: 1px solid #f1f5f9; }
+.produto-acoes { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-top: 1px solid #f1f5f9; }
+.edit-btn { background-color: #f1f5f9; color: #334155; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-switch label { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 34px; transition: .4s; }
+.toggle-switch label:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: .4s; }
+.toggle-switch input:checked + label { background-color: #16a34a; }
+.toggle-switch input:checked + label:before { transform: translateX(22px); }

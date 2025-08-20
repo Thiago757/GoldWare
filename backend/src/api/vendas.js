@@ -4,6 +4,7 @@ const vendaController = require('../controllers/vendaController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.get('/', authMiddleware.verifyToken, vendaController.listarVendas);
+router.get('/:id', authMiddleware.verifyToken, vendaController.getVendaDetalhes);
 router.post('/finalizar', authMiddleware.verifyToken, vendaController.finalizarVenda);
 router.put('/:id/cancelar', authMiddleware.verifyToken, vendaController.cancelarVenda);
 

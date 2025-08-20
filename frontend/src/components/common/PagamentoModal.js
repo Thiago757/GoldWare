@@ -49,31 +49,37 @@ function PagamentoModal({ isOpen, onClose, onFinalize, totalVenda }) {
         onFinalize({ pagamentos, troco: -valorFaltante });
     };
     
-    return (
-        <div className="modal-overlay">
-            <div className="modal-content" style={{textAlign: 'left', minWidth: '500px'}}>
-                <h2>Finalizar Venda</h2>
-                <div className="pagamento-total"><span>Valor Total:</span><strong>R$ {totalVenda.toFixed(2)}</strong></div>
-                <div className="pagamento-total" style={{backgroundColor: '#dcfce7', color: '#166534'}}><span>Total Pago:</span><strong>R$ {totalPago.toFixed(2)}</strong></div>
-                <div className="pagamento-total" style={{backgroundColor: '#fee2e2', color: '#991b1b'}}><span>Faltando:</span><strong>R$ {valorFaltante > 0 ? valorFaltante.toFixed(2) : '0.00'}</strong></div>
+   return (
+    <div className="modal-overlay">
+        <div className="modal-content" style={{textAlign: 'left', minWidth: '500px'}}>
+            <h2>Finalizar Venda</h2>
+            <div className="pagamento-total"><span>Valor Total:</span><strong>R$ {totalVenda.toFixed(2)}</strong></div>
+            <div className="pagamento-total pago"><span>Total Pago:</span><strong>R$ {totalPago.toFixed(2)}</strong></div>
+            <div className="pagamento-total faltando"><span>Faltando:</span><strong>R$ {valorFaltante > 0 ? valorFaltante.toFixed(2) : '0.00'}</strong></div>
 
-                <div className="pagamentos-adicionados">
-                    {pagamentos.map((p, i) => (
-                        <div key={i} className="pagamento-item">
-                            <span>{p.forma} {p.parcelas ? `(${p.parcelas}x)` : ''}: R$ {p.valor.toFixed(2)}</span>
-                        </div>
-                    ))}
-                </div>
+            <div className="pagamentos-adicionados">
+                {pagamentos.map((p, i) => (
+                    <div key={i} className="pagamento-item">
+                        <span>{p.forma} {p.parcelas ? `(${p.parcelas}x)` : ''}: R$ {p.valor.toFixed(2)}</span>
+                    </div>
+                ))}
+            </div>
 
-                {valorFaltante > 0.001 && (
-                    <div className="pagamento-form">
+            {valorFaltante > 0.001 && (
+                <div className="pagamento-form">
+                    {/* Classes específicas adicionadas aos wrappers */}
+                    <div className="form-field tipo-pagamento">
+                        <label>Forma</label>
                         <select value={formaPagamento} onChange={e => setFormaPagamento(e.target.value)}>
                             <option value="Dinheiro">Dinheiro</option>
                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="Pix">Pix</option>
                         </select>
-                        <CurrencyInput
+                    </div>
+                    <div className="form-field valor-pagamento">
+                         <label>Valor a Pagar</label>
+                         <CurrencyInput
                             name="valor-pagamento"
                             value={valorAtual}
                             onValueChange={(value) => setValorAtual(value || '0')}
@@ -83,26 +89,33 @@ function PagamentoModal({ isOpen, onClose, onFinalize, totalVenda }) {
                             decimalSeparator=","
                             groupSeparator="."
                         />
-                        {formaPagamento === 'Cartão de Crédito' && (
+                    </div>
+                    {formaPagamento === 'Cartão de Crédito' && (
+                        <div className="form-field parcelas-pagamento">
+                            <label>Parcelas</label>
                             <select value={parcelas} onChange={e => setParcelas(parseInt(e.target.value))}>
                                 {[...Array(12).keys()].map(i => <option key={i+1} value={i+1}>{i+1}x</option>)}
                             </select>
-                        )}
-                        <button onClick={adicionarPagamento} className="add-pagamento-btn">+</button>
+                        </div>
+                    )}
+                    <div className="form-field add-pagamento">
+                         <label>&nbsp;</label>
+                         <button onClick={adicionarPagamento} className="add-pagamento-btn">+</button>
                     </div>
-                )}
-                
-                {valorFaltante < -0.001 && (
-                    <div className="pagamento-troco"><span>Troco:</span><strong>R$ {(-valorFaltante).toFixed(2)}</strong></div>
-                )}
-
-                <div className="modal-actions">
-                    <button onClick={onClose} className="modal-button cancel">Voltar</button>
-                    <button onClick={handleFinalizeClick} className="modal-button confirm" disabled={valorFaltante > 0.001}>Finalizar Venda</button>
                 </div>
+            )}
+            
+            {valorFaltante < -0.001 && (
+                <div className="pagamento-troco"><span>Troco:</span><strong>R$ {(-valorFaltante).toFixed(2)}</strong></div>
+            )}
+
+            <div className="modal-actions">
+                <button onClick={onClose} className="modal-button cancel">Voltar</button>
+                <button onClick={handleFinalizeClick} className="modal-button confirm" disabled={valorFaltante > 0.001}>Finalizar Venda</button>
             </div>
         </div>
-    );
+    </div>
+);
 }
 
 export default PagamentoModal;

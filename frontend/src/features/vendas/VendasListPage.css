@@ -1,15 +1,22 @@
 .vendas-list-container {
     background-color: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     overflow: hidden;
+    height: 100%; 
+    display: flex;
+    flex-direction: column;
+}
+
+.vendas-list-header, .filtros-container {
+    flex-shrink: 0;
 }
 
 .vendas-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 25px;
+    padding: 20px 25px; 
     border-bottom: 1px solid #f1f5f9;
 }
 
@@ -39,9 +46,9 @@
 
 .filtros-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; 
     gap: 15px;
-    padding: 20px 25px;
+    padding: 20px 25px; 
     align-items: center;
     border-bottom: 1px solid #f1f5f9;
     background-color: #f8fafc;
@@ -51,7 +58,6 @@
     padding: 10px 15px;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
-    background-color: #fff;
     background-color: #fff;
     font-size: 0.9rem;
     color: #334155;
@@ -71,16 +77,12 @@
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.filtrar-btn:hover {
-    background-color: #1e293b;
 }
 
 .vendas-table-container {
+    flex-grow: 1; 
+    overflow-y: auto;
     padding: 0;
-    overflow-x: auto;
 }
 
 .vendas-table-container table {
@@ -88,7 +90,6 @@
     border-collapse: collapse;
 }
 
-.vendas-table-container th,
 .vendas-table-container td {
     text-align: left;
     padding: 15px 25px;
@@ -96,38 +97,111 @@
     white-space: nowrap;
 }
 
-.vendas-table-container th {
-    color: #64748b;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    background-color: #f8fafc;
-}
-
 .vendas-table-container tr:last-child td {
     border-bottom: none;
 }
 
-.vendas-table-container tr:hover {
+.vendas-table-container tbody tr:hover {
     background-color: #f8fafc;
 }
 
-.cancelar-venda-icon-btn {
+.vendas-table-container thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.vendas-table-container th {
+    text-align: left;
+    padding: 15px 25px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    background-color: #fff; 
+}
+
+.coluna-acoes {
+    position: relative;
+    text-align: right;
+    width: 60px;
+}
+
+.action-icon-btn {
     background: none;
     border: none;
     color: #94a3b8;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     cursor: pointer;
-    transition: color 0.2s;
+    padding: 8px;
+    border-radius: 50%;
+    display: inline-flex;
+    transition: background-color 0.2s;
 }
 
-.cancelar-venda-icon-btn:hover {
-    color: #ef4444;
+.action-icon-btn:hover {
+    background-color: #f1f5f9;
+    color: #334155;
 }
 
-.cancelar-venda-icon-btn:disabled {
-    color: #cbd5e1;
+.acoes-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 25px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    width: 180px;
+    padding: 8px;
+    border: 1px solid #f1f5f9;
+    animation: fadeInDropdown 0.2s ease-out;
+}
+
+.acoes-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.acoes-dropdown button:hover {
+    background-color: #f8fafc;
+}
+
+.acoes-dropdown button.cancel-action:hover {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.acoes-dropdown button:disabled {
+    color: #94a3b8;
     cursor: not-allowed;
+}
+
+.acoes-dropdown button svg {
+    font-size: 1rem;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .status-pago, .status-pendente, .status-cancelado, .status-default {
@@ -136,6 +210,7 @@
     font-size: 12px;
     font-weight: 600;
     text-transform: capitalize;
+    display: inline-block;
 }
 
 .status-pago { background-color: #dcfce7; color: #166534; }

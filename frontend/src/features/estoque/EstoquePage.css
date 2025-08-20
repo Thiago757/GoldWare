@@ -1,0 +1,9 @@
+.estoque-container { padding: 10px; }
+.estoque-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.estoque-header h1 { font-size: 1.8rem; color: #1e293b; }
+.add-produto-btn { background-color: #16a34a; color: white; border: none; padding: 12px 22px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
