@@ -23,8 +23,8 @@ function PagamentosPage() {
             const params = new URLSearchParams();
             if (filtros.nomeCliente) params.append('nomeCliente', filtros.nomeCliente);
             if (filtros.status) params.append('status', filtros.status);
-            if (filtros.startDate) params.append('startDate', filtros.startDate.toISOString());
-            if (filtros.endDate) params.append('endDate', filtros.endDate.toISOString());
+            if (filtros.startDate) params.append('startDate', filtros.startDate.toISOString().split('T')[0]);
+            if (filtros.endDate) params.append('endDate', filtros.endDate.toISOString().split('T')[0]);
             
             const response = await fetch(`http://localhost:3001/api/pagamentos/contas-a-receber?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -42,7 +42,7 @@ function PagamentosPage() {
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchContas();
-        }, 500); 
+        }, 500);
         return () => clearTimeout(timer);
     }, [filtros, token]);
 

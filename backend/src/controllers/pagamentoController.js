@@ -79,11 +79,19 @@ exports.listarContas = async (req, res) => {
                 conditions.push(`car.status = $${params.length}`);
             }
         }
-        if (startDate) {
+        
+        if (startDate && status === 'pago') {
+            params.push(startDate);
+            conditions.push(`car.data_pagamento >= $${params.length}`);
+        } else if (startDate) {
             params.push(startDate);
             conditions.push(`car.data_vencimento >= $${params.length}`);
         }
-        if (endDate) {
+
+        if (endDate && status === 'pago') {
+            params.push(endDate);
+            conditions.push(`car.data_pagamento <= $${params.length}`);
+        } else if (endDate) {
             params.push(endDate);
             conditions.push(`car.data_vencimento <= $${params.length}`);
         }
