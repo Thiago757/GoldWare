@@ -1,0 +1,29 @@
+.kpi-financeiro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 25px; }
+.kpi-card-financeiro { padding: 20px; border-radius: 8px; color: white; }
+.kpi-card-financeiro span { display: block; font-size: 1rem; opacity: 0.9; }
+.kpi-card-financeiro strong { display: block; font-size: 2rem; font-weight: 700; }
+.kpi-card-financeiro.a-receber { background-color: #3b82f6; }
+.kpi-card-financeiro.recebido { background-color: #16a34a; }
+.kpi-card-financeiro.atrasado { background-color: #ef4444; }
+.status-atrasado {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.pagar-btn {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.react-datepicker-popper {
+    z-index: 2; 
+}

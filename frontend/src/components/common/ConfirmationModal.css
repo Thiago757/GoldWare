@@ -9,20 +9,19 @@
     width: 90%; text-align: center; animation: fadeInModal 0.3s ease-out;
 }
 .modal-content h2 { margin-top: 0; margin-bottom: 20px; color: #1e293b; }
-.modal-content p { margin-bottom: 25px; color: #475569; font-size: 16px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
 .modal-button { border: none; padding: 10px 25px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
 .modal-button.cancel { background-color: #e2e8f0; color: #475569; }
 .modal-button.cancel:hover { background-color: #cbd5e1; }
-.modal-button.confirm { background-color: #ef4444; color: white; } 
+.modal-button.confirm { background-color: #ef4444; color: white; }
 .modal-button.confirm:hover { background-color: #dc2626; }
-.modal-button.confirm.save { background-color: #16a34a; } 
+.modal-button.confirm.save { background-color: #16a34a; }
 .modal-button.confirm.save:hover { background-color: #15803d; }
 @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
 .modal-form-group { margin-bottom: 15px; }
 .modal-form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: #334155; }
-.modal-form-group input {
+.modal-form-group input, 
+.modal-form-group .IMaskInput {
     width: 100%; padding: 10px; border-radius: 6px;
     border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box;
 }

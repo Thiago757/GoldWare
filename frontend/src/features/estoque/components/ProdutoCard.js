@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaEdit } from 'react-icons/fa';
 import './ProdutoCard.css';
 
 const placeholderImage = 'https://i.imgur.com/gJZT2n2.png';
@@ -20,15 +21,25 @@ function ProdutoCard({ produto, onEdit, onToggleStatus }) {
                 </span>
             </div>
             <div className="produto-info">
-                <span className="produto-categoria">{produto.categoria}</span>
-                <h3 className="produto-nome">{produto.nome}</h3>
-                <p className="produto-preco">{precoFormatado}</p>
-                <div className="produto-estoque">
-                    Estoque: <strong>{produto.quantidade_estoque}</strong>
+                <div className="info-header">
+                    <span className="produto-categoria">{produto.categoria}</span>
+                    <h3 className="produto-nome">{produto.nome}</h3>
+                </div>
+                <div className="info-body">
+                    <div className="info-item">
+                        <span>Estoque</span>
+                        <strong>{produto.quantidade_estoque}</strong>
+                    </div>
+                    <div className="info-item">
+                        <span>Preço</span>
+                        <strong className="produto-preco">{precoFormatado}</strong>
+                    </div>
                 </div>
             </div>
             <div className="produto-acoes">
-                <button onClick={onEdit} className="edit-btn">Editar</button>
+                <button onClick={onEdit} className="edit-btn" title="Editar Produto">
+                    <FaEdit />
+                </button>
                 <div className="toggle-switch">
                     <input 
                         type="checkbox" 
