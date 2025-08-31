@@ -7,6 +7,7 @@ import ConfirmationModal from '../../components/common/ConfirmationModal';
 import VendaDetalhesModal from '../../components/common/VendaDetalhesModal';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
+import { startOfWeek, endOfWeek, subWeeks, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
 import "react-datepicker/dist/react-datepicker.css";
 import './VendasListPage.css';
 import { FaEye, FaTimesCircle } from 'react-icons/fa';
@@ -26,6 +27,7 @@ function VendasListPage() {
     const [loadingDetalhes, setLoadingDetalhes] = useState(false);
     const [menuAbertoId, setMenuAbertoId] = useState(null);
     const acoesMenuRef = useRef(null);
+    const [filtroPeriodo, setFiltroPeriodo] = useState('todos');
     
     const { token } = useContext(AuthContext);
     const { iniciarNovaVenda } = useContext(VendaContext);
@@ -67,6 +69,44 @@ function VendasListPage() {
             fetchVendas();
         }
     }, [token]);
+    
+    useEffect(() => {
+        const hoje = new Date();
+        let startDate = null;
+        let endDate = null;
+
+        switch (filtroPeriodo) {
+            case 'hoje':
+                startDate = hoje;
+                endDate = hoje;
+                break;
+            case 'semana_atual':
+                startDate = startOfWeek(hoje, { weekStartsOn: 1 });
+                endDate = endOfWeek(hoje, { weekStartsOn: 1 });
+                break;
+            case 'mes_atual':
+                startDate = startOfMonth(hoje);
+                endDate = endOfMonth(hoje);
+                break;
+            case 'mes_passado':
+                const mesPassado = subMonths(hoje, 1);
+                startDate = startOfMonth(mesPassado);
+                endDate = endOfMonth(mesPassado);
+                break;
+            case 'ano_atual':
+                startDate = startOfYear(hoje);
+                endDate = endOfYear(hoje);
+                break;
+            case 'ano_passado':
+                 const anoPassado = subYears(hoje, 1);
+                 startDate = startOfYear(anoPassado);
+                 endDate = endOfYear(anoPassado);
+                break;
+            default:
+                break;
+        }
+        setFiltros(prevFiltros => ({ ...prevFiltros, startDate, endDate }));
+    }, [filtroPeriodo]);
 
     const handleClienteSelecionado = (cliente) => {
         iniciarNovaVenda(cliente);
@@ -119,14 +159,39 @@ function VendasListPage() {
                     <button onClick={() => setClienteModalOpen(true)} className="nova-venda-btn">+ Nova Venda</button>
                 </div>
                 <div className="filtros-container">
-                    <DatePicker selected={filtros.startDate} onChange={date => setFiltros({...filtros, startDate: date})} className="filtro-input" placeholderText="Data Início" locale="pt-BR" dateFormat="dd/MM/yyyy" isClearable />
-                    <DatePicker selected={filtros.endDate} onChange={date => setFiltros({...filtros, endDate: date})} className="filtro-input" placeholderText="Data Fim" locale="pt-BR" dateFormat="dd/MM/yyyy" isClearable />
-                    <select value={filtros.status} onChange={e => setFiltros({...filtros, status: e.target.value})} className="filtro-input">
-                        <option value="">Todos os Status</option>
-                        <option value="pago">Pago</option>
-                        <option value="pendente">Pendente</option>
-                        <option value="cancelado">Cancelado</option>
-                    </select>
+                    <div className="filtro-item">
+                        <label>Período Rápido</label>
+                        <select 
+                            className="filtro-input"
+                            value={filtroPeriodo}
+                            onChange={e => setFiltroPeriodo(e.target.value)}
+                        >
+                            <option value="todos">Todos</option>
+                            <option value="hoje">Hoje</option>
+                            <option value="semana_atual">Esta Semana</option>
+                            <option value="mes_atual">Este Mês</option>
+                            <option value="mes_passado">Mês Passado</option>
+                            <option value="ano_atual">Este Ano</option>
+                            <option value="ano_passado">Ano Passado</option>
+                        </select>
+                    </div>
+                    <div className="filtro-item">
+                        <label>Data Início</label>
+                        <DatePicker selected={filtros.startDate} onChange={date => setFiltros({...filtros, startDate: date})} className="filtro-input" placeholderText="DD/MM/AAAA" locale="pt-BR" dateFormat="dd/MM/yyyy" isClearable />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Data Fim</label>
+                        <DatePicker selected={filtros.endDate} onChange={date => setFiltros({...filtros, endDate: date})} className="filtro-input" placeholderText="DD/MM/AAAA" locale="pt-BR" dateFormat="dd/MM/yyyy" isClearable />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Status</label>
+                        <select value={filtros.status} onChange={e => setFiltros({...filtros, status: e.target.value})} className="filtro-input">
+                            <option value="">Todos</option>
+                            <option value="pago">Pago</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
                     <button onClick={fetchVendas} className="filtrar-btn">Filtrar</button>
                 </div>
                 <div className="vendas-table-container">

@@ -5,15 +5,21 @@ const path = require('path');
 
 exports.listarProdutos = async (req, res) => {
     try {
-        const { nome, ativo } = req.query;
+        const { searchTerm, ativo, codigo_barras } = req.query; 
 
         let query = 'SELECT * FROM produtos';
         const params = [];
         const conditions = [];
 
-        if (nome) {
-            params.push(`%${nome}%`);
-            conditions.push(`nome ILIKE $${params.length}`);
+        if (searchTerm) {
+            if (!isNaN(searchTerm.replace(/[^\d]/g, ""))) {
+                params.push(`%${searchTerm}%`);
+                params.push(`%${searchTerm}%`);
+                conditions.push(`(nome ILIKE $1 OR codigo_barras LIKE $2)`);
+            } else {
+                params.push(`%${searchTerm}%`);
+                conditions.push(`nome ILIKE $1`);
+            }
         }
 
         if (ativo) {
@@ -21,10 +27,15 @@ exports.listarProdutos = async (req, res) => {
             conditions.push(`ativo = $${params.length}`);
         }
 
+        if (codigo_barras) {
+            params.push(`${codigo_barras}%`);
+            conditions.push(`codigo_barras LIKE $${params.length}`);
+        }
+
         if (conditions.length > 0) {
             query += ' WHERE ' + conditions.join(' AND ');
         }
-
+        
         query += ' ORDER BY nome ASC';
 
         const result = await pool.query(query, params);

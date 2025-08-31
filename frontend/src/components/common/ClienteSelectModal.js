@@ -4,6 +4,7 @@ import AsyncSelect from 'react-select/async';
 import AddClienteModal from './AddClienteModal';
 import './ConfirmationModal.css';
 import { AuthContext } from '../../context/AuthContext';
+import { formatCPF } from '../../utils/formatters';
 
 function ClienteSelectModal({ isOpen, onClose, onConfirm }) {
     const [clienteSelecionado, setClienteSelecionado] = useState(null);
@@ -17,9 +18,10 @@ function ClienteSelectModal({ isOpen, onClose, onConfirm }) {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
+            
             return data.map(cliente => ({
                 value: cliente.id_cliente,
-                label: cliente.nome,
+                label: `${cliente.nome} - CPF: ${formatCPF(cliente.cpf)}`,
             }));
         } catch (error) {
             console.error("Erro ao carregar clientes", error);

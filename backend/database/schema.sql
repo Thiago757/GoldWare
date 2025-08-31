@@ -8,7 +8,7 @@ CREATE TABLE clientes (
     telefone VARCHAR(20),
     email VARCHAR(100),
     endereco TEXT,
-    status VARCHAR(10) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
+    status VARCHAR(10) NOT NULL DEFAULT 'S' CHECK (status IN ('S', 'N')),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -115,43 +115,43 @@ CREATE TABLE contas_a_receber (
 -- ========= CRIAÇÃO DE TODOS OS ÍNDICES =========
 
 -- ÍNDICES: Clientes
-[cite_start]CREATE INDEX idx_clientes_nome ON clientes(nome); [cite: 10]
-[cite_start]CREATE INDEX idx_clientes_cpf ON clientes(cpf); [cite: 10]
-[cite_start]CREATE INDEX idx_clientes_status ON clientes(status); [cite: 10]
+[cite_start]CREATE INDEX idx_clientes_nome ON clientes(nome);
+[cite_start]CREATE INDEX idx_clientes_cpf ON clientes(cpf); 
+[cite_start]CREATE INDEX idx_clientes_status ON clientes(status);
 
 -- ÍNDICES: Fornecedores
-[cite_start]CREATE INDEX idx_fornecedores_nome ON fornecedores(nome); [cite: 9]
-[cite_start]CREATE INDEX idx_fornecedores_status ON fornecedores(status); [cite: 9]
+[cite_start]CREATE INDEX idx_fornecedores_nome ON fornecedores(nome);
+[cite_start]CREATE INDEX idx_fornecedores_status ON fornecedores(status);
 
 -- ÍNDICES: Produtos
-[cite_start]CREATE INDEX idx_produtos_nome ON produtos(nome); [cite: 11]
-[cite_start]CREATE INDEX idx_produtos_categoria ON produtos(categoria); [cite: 11]
-[cite_start]CREATE INDEX idx_produtos_ativo ON produtos(ativo); [cite: 11]
+[cite_start]CREATE INDEX idx_produtos_nome ON produtos(nome);
+[cite_start]CREATE INDEX idx_produtos_categoria ON produtos(categoria);
+[cite_start]CREATE INDEX idx_produtos_ativo ON produtos(ativo);
 CREATE INDEX idx_produtos_codigo_barras ON produtos(codigo_barras);
 
 -- ÍNDICES: Movimentações de Estoque
-[cite_start]CREATE INDEX idx_mov_produto ON movimentacoes_estoque(id_produto); [cite: 12]
-[cite_start]CREATE INDEX idx_mov_fornecedor ON movimentacoes_estoque(id_fornecedor); [cite: 12]
-[cite_start]CREATE INDEX idx_mov_data ON movimentacoes_estoque(data_movimentacao); [cite: 12]
-[cite_start]CREATE INDEX idx_mov_tipo ON movimentacoes_estoque(tipo_movimentacao); [cite: 13]
+[cite_start]CREATE INDEX idx_mov_produto ON movimentacoes_estoque(id_produto); 
+[cite_start]CREATE INDEX idx_mov_fornecedor ON movimentacoes_estoque(id_fornecedor); 
+[cite_start]CREATE INDEX idx_mov_data ON movimentacoes_estoque(data_movimentacao); 
+[cite_start]CREATE INDEX idx_mov_tipo ON movimentacoes_estoque(tipo_movimentacao); 
 
 -- ÍNDICES: Vendas
-[cite_start]CREATE INDEX idx_vendas_data ON vendas(data_venda); [cite: 13]
-[cite_start]CREATE INDEX idx_vendas_status ON vendas(status_pagamento); [cite: 13]
-[cite_start]CREATE INDEX idx_vendas_cliente ON vendas(id_cliente); [cite: 14]
+[cite_start]CREATE INDEX idx_vendas_data ON vendas(data_venda); 
+[cite_start]CREATE INDEX idx_vendas_status ON vendas(status_pagamento); 
+[cite_start]CREATE INDEX idx_vendas_cliente ON vendas(id_cliente); 
 
 -- ÍNDICES: Itens da Venda
-[cite_start]CREATE INDEX idx_itens_venda_venda ON itens_venda(id_venda); [cite: 14]
-[cite_start]CREATE INDEX idx_itens_venda_produto ON itens_venda(id_produto); [cite: 14]
+[cite_start]CREATE INDEX idx_itens_venda_venda ON itens_venda(id_venda); 
+[cite_start]CREATE INDEX idx_itens_venda_produto ON itens_venda(id_produto); 
 
 -- ÍNDICES: Pagamentos
-[cite_start]CREATE INDEX idx_pagamentos_data ON pagamentos(data_pagamento); [cite: 15]
-[cite_start]CREATE INDEX idx_pagamentos_status ON pagamentos(status); [cite: 15]
-[cite_start]CREATE INDEX idx_pagamentos_venda ON pagamentos(id_venda); [cite: 15]
+[cite_start]CREATE INDEX idx_pagamentos_data ON pagamentos(data_pagamento); 
+[cite_start]CREATE INDEX idx_pagamentos_status ON pagamentos(status); 
+[cite_start]CREATE INDEX idx_pagamentos_venda ON pagamentos(id_venda); 
 
 -- ÍNDICES: Usuários
-[cite_start]CREATE INDEX idx_usuarios_email ON usuarios(email); [cite: 16]
-[cite_start]CREATE INDEX idx_usuarios_tipo ON usuarios(tipo); [cite: 16]
+[cite_start]CREATE INDEX idx_usuarios_email ON usuarios(email); 
+[cite_start]CREATE INDEX idx_usuarios_tipo ON usuarios(tipo); 
 
 -- ÍNDICES: Contas a Receber
 CREATE INDEX idx_contas_a_receber_status ON contas_a_receber(status);

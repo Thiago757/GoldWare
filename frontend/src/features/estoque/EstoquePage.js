@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
 import './EstoquePage.css';
+import '../vendas/VendasListPage.css'; 
 
 function EstoquePage() {
     const [produtos, setProdutos] = useState([]);
@@ -11,6 +12,7 @@ function EstoquePage() {
     const [isModalOpen, setModalOpen] = useState(false);
     const [produtoEmEdicao, setProdutoEmEdicao] = useState(null);
     const [filtroNome, setFiltroNome] = useState('');
+    const [filtroCodigoBarras, setFiltroCodigoBarras] = useState('');
     const [filtroStatus, setFiltroStatus] = useState('');
 
     const fetchProdutos = async () => {
@@ -19,12 +21,12 @@ function EstoquePage() {
         try {
             const params = new URLSearchParams();
             if (filtroNome) params.append('nome', filtroNome);
+            if (filtroCodigoBarras) params.append('codigo_barras', filtroCodigoBarras);
             if (filtroStatus) params.append('ativo', filtroStatus);
 
             const response = await fetch(`http://localhost:3001/api/produtos?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if (!response.ok) throw new Error('Falha ao buscar produtos');
             const data = await response.json();
             setProdutos(data);
@@ -36,15 +38,15 @@ function EstoquePage() {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (token) {
-                fetchProdutos();
-            }
-        }, 300);
+        if (token) {
+            fetchProdutos();
+        }
+    }, [token]);
 
-        return () => clearTimeout(timer); 
-    }, [filtroNome, filtroStatus, token]);
-
+    const handleFiltroSubmit = (e) => {
+        e.preventDefault();
+        fetchProdutos();
+    };
 
     const handleAbreModalCadastro = () => {
         setProdutoEmEdicao(null);
@@ -130,25 +132,41 @@ function EstoquePage() {
                     <h1>Gerenciamento de Estoque</h1>
                     <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
                 </div>
-
-                <div className="filtros-container-estoque">
-                    <input 
-                        type="text"
-                        placeholder="Pesquisar por nome..."
-                        className="filtro-input-estoque nome"
-                        value={filtroNome}
-                        onChange={e => setFiltroNome(e.target.value)}
-                    />
-                    <select 
-                        className="filtro-input-estoque status"
-                        value={filtroStatus}
-                        onChange={e => setFiltroStatus(e.target.value)}
-                    >
-                        <option value="">Todos</option>
-                        <option value="S">Ativo</option>
-                        <option value="N">Inativo</option>
-                    </select>
-                </div>
+                <form onSubmit={handleFiltroSubmit} className="filtros-container">
+                    <div className="filtro-item" style={{flexGrow: 1}}>
+                        <label>Nome</label>
+                        <input 
+                            type="text"
+                            placeholder="Digite o nome do produto..."
+                            className="filtro-input"
+                            value={filtroNome}
+                            onChange={e => setFiltroNome(e.target.value)}
+                        />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Código de Barras</label>
+                        <input 
+                            type="text"
+                            placeholder="Digite ou leia o código..."
+                            className="filtro-input"
+                            value={filtroCodigoBarras}
+                            onChange={e => setFiltroCodigoBarras(e.target.value)}
+                        />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Status</label>
+                        <select 
+                            className="filtro-input"
+                            value={filtroStatus}
+                            onChange={e => setFiltroStatus(e.target.value)}
+                        >
+                            <option value="">Todos</option>
+                            <option value="S">Ativo</option>
+                            <option value="N">Inativo</option>
+                        </select>
+                    </div>
+                    <button type="submit" className="filtrar-btn">Filtrar</button>
+                </form>
 
                 <div className="produtos-grid">
                     {loading ? (
@@ -170,7 +188,7 @@ function EstoquePage() {
 
             <ProdutoModal
                 isOpen={isModalOpen}
-                onClose={() => setModalOpen(false)}
+                onClose={() => { setModalOpen(false); setProdutoEmEdicao(null); }}
                 produto={produtoEmEdicao}
                 onSave={handleSalvarProduto}
             />

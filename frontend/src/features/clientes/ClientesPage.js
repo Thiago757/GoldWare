@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import AddClienteModal from '../../components/common/AddClienteModal';
 import ClienteDetalhesModal from '../../components/common/ClienteDetalhesModal';
 import { formatCPF, formatTelefone } from '../../utils/formatters';
+import { IMaskInput } from 'react-imask';
 import '../estoque/components/ProdutoCard.css';
 import '../vendas/VendasListPage.css';
 import { BsThreeDotsVertical } from 'react-icons/bs';
@@ -14,12 +15,13 @@ function ClientesPage() {
     const [isAddModalOpen, setAddModalOpen] = useState(false);
     const [filtroNome, setFiltroNome] = useState('');
     const [filtroStatus, setFiltroStatus] = useState('');
+    const [filtroCpf, setFiltroCpf] = useState('');
     const [isDetalhesModalOpen, setDetalhesModalOpen] = useState(false);
     const [clienteSelecionado, setClienteSelecionado] = useState(null);
     const [loadingDetalhes, setLoadingDetalhes] = useState(false);
     const [menuAbertoId, setMenuAbertoId] = useState(null);
     const acoesMenuRef = useRef(null);
-    const [clienteEmEdicao, setClienteEmEdicao] = useState(null); 
+    const [clienteEmEdicao, setClienteEmEdicao] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -37,6 +39,7 @@ function ClientesPage() {
         try {
             const params = new URLSearchParams();
             if (filtroNome) params.append('nome', filtroNome);
+            if (filtroCpf) params.append('cpf', filtroCpf.replace(/[^\d]/g, ""));
             if (filtroStatus) params.append('status', filtroStatus);
 
             const response = await fetch(`http://localhost:3001/api/clientes?${params.toString()}`, {
@@ -53,31 +56,33 @@ function ClientesPage() {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (token) fetchClientes();
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [filtroNome, filtroStatus, token]);
+        if (token) {
+            fetchClientes();
+        }
+    }, [token]);
+    
+    const handleFiltroSubmit = (e) => {
+        e.preventDefault();
+        fetchClientes();
+    };
 
     const handleClientSaved = (novoCliente) => {
         setAddModalOpen(false);
-        setClienteEmEdicao(null); 
+        setClienteEmEdicao(null);
         fetchClientes();
     };
     
     const handleUpdateStatus = async (cliente) => {
         const novoStatus = cliente.status === 'ativo' ? 'inativo' : 'ativo';
         try {
-            const response = await fetch(`http://localhost:3001/api/clientes/${cliente.id_cliente}/status`, {
+            await fetch(`http://localhost:3001/api/clientes/${cliente.id_cliente}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ status: novoStatus })
             });
-            if (!response.ok) throw new Error('Falha ao atualizar o status do cliente.');
             fetchClientes();
         } catch (error) {
             console.error("Erro ao atualizar status do cliente:", error);
-            alert("Erro ao atualizar o status.");
         }
     };
 
@@ -120,35 +125,47 @@ function ClientesPage() {
                     <button onClick={handleAbreModalCadastro} className="nova-venda-btn">+ Novo Cliente</button>
                 </div>
 
-                <div className="filtros-container">
-                    <input 
-                        type="text"
-                        placeholder="Pesquisar por nome..."
-                        className="filtro-input"
-                        style={{flexGrow: 1}}
-                        value={filtroNome}
-                        onChange={e => setFiltroNome(e.target.value)}
-                    />
-                    <select 
-                        className="filtro-input"
-                        value={filtroStatus}
-                        onChange={e => setFiltroStatus(e.target.value)}
-                    >
-                        <option value="">Todos</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                    </select>
-                </div>
+                <form onSubmit={handleFiltroSubmit} className="filtros-container">
+                    <div className="filtro-item" style={{flexGrow: 1}}>
+                        <label>Pesquisar por nome</label>
+                        <input 
+                            type="text"
+                            placeholder="Digite o nome do cliente..."
+                            className="filtro-input"
+                            value={filtroNome}
+                            onChange={e => setFiltroNome(e.target.value)}
+                        />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Pesquisar por CPF</label>
+                        <IMaskInput
+                            mask="000.000.000-00"
+                            value={filtroCpf}
+                            onAccept={(value) => setFiltroCpf(value)}
+                            placeholder="Digite o CPF..."
+                            className="filtro-input"
+                        />
+                    </div>
+                    <div className="filtro-item">
+                        <label>Status</label>
+                        <select 
+                            className="filtro-input"
+                            value={filtroStatus}
+                            onChange={e => setFiltroStatus(e.target.value)}
+                        >
+                            <option value="">Todos</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                    <button type="submit" className="filtrar-btn">Filtrar</button>
+                </form>
 
                 <div className="vendas-table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Nome</th>
-                                <th>CPF</th>
-                                <th>Telefone</th>
-                                <th>Email</th>
-                                <th>Status</th>
+                                <th>Nome</th><th>CPF</th><th>Telefone</th><th>Email</th><th>Status</th>
                                 <th style={{textAlign: 'right'}}>Ações</th>
                             </tr>
                         </thead>
@@ -161,9 +178,7 @@ function ClientesPage() {
                                     <td>{cliente.email}</td>
                                     <td>
                                         <div className="toggle-switch">
-                                            <input 
-                                                type="checkbox" 
-                                                id={`switch-cliente-${cliente.id_cliente}`}
+                                            <input type="checkbox" id={`switch-cliente-${cliente.id_cliente}`}
                                                 checked={cliente.status === 'ativo'}
                                                 onChange={() => handleUpdateStatus(cliente)}
                                             />
@@ -176,12 +191,8 @@ function ClientesPage() {
                                         </button>
                                         {menuAbertoId === cliente.id_cliente && (
                                             <div className="acoes-dropdown">
-                                                <button onClick={() => { handleVerDetalhes(cliente.id_cliente); setMenuAbertoId(null); }}>
-                                                    Ver Detalhes
-                                                </button>
-                                                <button onClick={() => handleAbreModalEdicao(cliente)}>
-                                                    Editar Cliente
-                                                </button>
+                                                <button onClick={() => { handleVerDetalhes(cliente.id_cliente); setMenuAbertoId(null); }}>Ver Detalhes</button>
+                                                <button onClick={() => handleAbreModalEdicao(cliente)}>Editar Cliente</button>
                                             </div>
                                         )}
                                     </td>
@@ -196,7 +207,7 @@ function ClientesPage() {
                 isOpen={isAddModalOpen}
                 onClose={() => { setAddModalOpen(false); setClienteEmEdicao(null); }}
                 onClientSaved={handleClientSaved}
-                cliente={clienteEmEdicao} 
+                cliente={clienteEmEdicao}
             />
             <ClienteDetalhesModal 
                 isOpen={isDetalhesModalOpen} 

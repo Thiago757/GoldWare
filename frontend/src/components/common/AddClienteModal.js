@@ -65,7 +65,6 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
     return (
         <div className="modal-overlay">
             <form onSubmit={handleSubmit} className="modal-content" style={{textAlign: 'left'}}>
-                {/* O título do modal agora é dinâmico */}
                 <h2>{cliente ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}</h2>
                 
                 <div className="modal-form-group">

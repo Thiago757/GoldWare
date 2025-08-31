@@ -2,15 +2,22 @@ const pool = require('../config/database');
 
 exports.searchClientes = async (req, res) => {
     try {
-        const searchTerm = req.query.q || ''; 
-        
-        const result = await pool.query(
-            "SELECT id_cliente, nome FROM clientes WHERE nome ILIKE $1 AND status = 'ativo' LIMIT 10",
-            [`%${searchTerm}%`]
-        );
+        const searchTerm = req.query.q || '';
+        const searchTermNumerico = searchTerm.replace(/[^\d]/g, "");
 
+        let result;
+        if (searchTermNumerico.length > 2 && !isNaN(searchTermNumerico)) {
+            result = await pool.query(
+                "SELECT id_cliente, nome, cpf FROM clientes WHERE cpf LIKE $1 AND status = 'ativo' LIMIT 10",
+                [`%${searchTermNumerico}%`]
+            );
+        } else {
+            result = await pool.query(
+                "SELECT id_cliente, nome, cpf FROM clientes WHERE nome ILIKE $1 AND status = 'ativo' LIMIT 10",
+                [`%${searchTerm}%`]
+            );
+        }
         res.status(200).json(result.rows);
-
     } catch (error) {
         console.error('Erro ao buscar clientes:', error);
         res.status(500).json({ message: 'Erro interno no servidor.' });
@@ -52,7 +59,7 @@ exports.createCliente = async (req, res) => {
 
 exports.listarClientes = async (req, res) => {
     try {
-        const { nome, status } = req.query;
+        const { nome, cpf, status } = req.query;
 
         let query = 'SELECT * FROM clientes';
         const params = [];
@@ -61,6 +68,10 @@ exports.listarClientes = async (req, res) => {
         if (nome) {
             params.push(`%${nome}%`);
             conditions.push(`nome ILIKE $${params.length}`);
+        }
+        if (cpf) {
+            params.push(cpf.replace(/[^\d]/g, "") + '%');
+            conditions.push(`cpf LIKE $${params.length}`);
         }
         if (status) {
             params.push(status);

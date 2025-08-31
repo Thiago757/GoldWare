@@ -47,11 +47,23 @@
 .filtros-container {
     display: flex;
     flex-wrap: wrap; 
-    gap: 15px;
+    gap: 20px; 
     padding: 20px 25px; 
-    align-items: center;
+    align-items: flex-end;
     border-bottom: 1px solid #f1f5f9;
     background-color: #f8fafc;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filtro-item label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
 }
 
 .filtro-input {

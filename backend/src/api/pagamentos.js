@@ -8,5 +8,7 @@ router.get('/contas-a-receber', pagamentoController.listarContas);
 router.get('/contas-a-receber/sumario', pagamentoController.getSumarioContasAReceber);
 router.get('/contas-a-receber/cliente/:idCliente', pagamentoController.getDetalhesCliente);
 router.put('/contas-a-receber/:idConta/pagar', pagamentoController.marcarParcelaComoPaga);
+router.get('/contas-a-receber/kpis', pagamentoController.getKpisFinanceiros);
+router.get('/extrato', pagamentoController.getExtratoFinanceiro);
 
 module.exports = router;
