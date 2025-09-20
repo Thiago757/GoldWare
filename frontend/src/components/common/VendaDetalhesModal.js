@@ -13,29 +13,37 @@ function VendaDetalhesModal({ isOpen, onClose, vendaData, loading }) {
                     <>
                         <h2>Detalhes da Venda #{vendaData.detalhes.id_venda}</h2>
 
+                        {/* 📌 Informações principais iguais à listagem */}
                         <div className="details-grid">
                             <div><strong>Cliente:</strong> {vendaData.detalhes.nome_cliente || 'N/A'}</div>
                             <div><strong>Data:</strong> {new Date(vendaData.detalhes.data_venda).toLocaleString('pt-BR')}</div>
-                            <div><strong>Status:</strong> <span className={`status-${(vendaData.detalhes.status_pagamento || 'default').toLowerCase()}`}>{vendaData.detalhes.status_pagamento}</span></div>
+                            <div>
+                                <strong>Status:</strong>
+                                <span className={`status-${(vendaData.detalhes.status_pagamento || 'default').toLowerCase()}`}>
+                                    {vendaData.detalhes.status_pagamento}
+                                </span>
+                            </div>
                             <div><strong>Valor Total:</strong> R$ {parseFloat(vendaData.detalhes.valor_total).toFixed(2)}</div>
                         </div>
 
+                        {/* 📌 Lista de Itens comprados */}
                         <h4>Produtos Comprados</h4>
                         <div className="itens-list-scroll">
-                            {vendaData.itens.map(item => (
-                                <div key={item.id_item} className="item-detail-row">
+                            {(vendaData.itens || []).map(item => (
+                                <div key={item.id_item_venda} className="item-detail-row">
                                     <span>{item.quantidade}x {item.nome_produto_snapshot || item.id_produto}</span>
                                     <span>R$ {parseFloat(item.preco_unitario * item.quantidade).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
 
-                        <h4>Pagamentos Efetuados</h4>
+                        {/* 📌 Parcelas/Pagamentos */}
+                        <h4>Parcelas / Pagamentos</h4>
                         <div className="pagamentos-list">
-                            {vendaData.pagamentos.map(pag => (
-                                <div key={pag.id_pagamento} className="pagamento-detail-row">
-                                    <span>{pag.forma_pagamento}</span>
-                                    <span>R$ {parseFloat(pag.valor_pago).toFixed(2)}</span>
+                            {(vendaData.parcelas || []).map(parcela => (
+                                <div key={parcela.id_conta_receber} className="pagamento-detail-row">
+                                    <span>Parcela {parcela.numero_parcela} - {parcela.status}</span>
+                                    <span>R$ {parseFloat(parcela.valor_parcela).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
