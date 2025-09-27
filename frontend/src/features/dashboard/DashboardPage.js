@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; // <-- CORRIGIDO: adicionado o useState
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -10,7 +10,7 @@ import {
   Legend,
   ArcElement
 } from "chart.js";
-import { Bar, Doughnut } from "react-chartjs-2"; // <-- CORRIGIDO: hífen simples
+import { Bar, Doughnut } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -61,8 +61,8 @@ export default function DashboardPage() {
 
   const { kpis, vendasPorMes, ultimasVendas, tiposDeProdutos } = data;
   
+  // ... (toda a lógica de dados do gráfico permanece a mesma)
   const datasetsVendas = [];
-
   if (graficoVisivel === 'quantidade' || graficoVisivel === 'both') {
     datasetsVendas.push({
       label: "Quantidade vendida",
@@ -72,7 +72,6 @@ export default function DashboardPage() {
       yAxisID: 'y',
     });
   }
-
   if (graficoVisivel === 'valor' || graficoVisivel === 'both') {
     datasetsVendas.push({
       label: "Valor vendido",
@@ -82,44 +81,20 @@ export default function DashboardPage() {
       yAxisID: 'y1',
     });
   }
-  
   const vendasChartData = {
     labels: vendasPorMes.map(v => v.mes),
     datasets: datasetsVendas,
   };
-  
   const vendasChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { display: false } },
-      y: {
-        type: 'linear',
-        display: graficoVisivel === 'quantidade' || graficoVisivel === 'both',
-        position: 'left',
-        beginAtZero: true,
-        grid: {
-          drawOnChartArea: true,
-        },
-      },
-      y1: {
-        type: 'linear',
-        display: graficoVisivel === 'valor' || graficoVisivel === 'both',
-        position: 'right',
-        beginAtZero: true,
-        grid: {
-          drawOnChartArea: false, 
-        },
-        ticks: {
-            callback: function(value) {
-                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-            }
-        }
-      },
+      y: { type: 'linear', display: graficoVisivel === 'quantidade' || graficoVisivel === 'both', position: 'left', beginAtZero: true },
+      y1: { type: 'linear', display: graficoVisivel === 'valor' || graficoVisivel === 'both', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { callback: function(value) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value); } } },
     },
   };
-
   const produtosChartData = {
     labels: tiposDeProdutos.map(p => p.tipo),
     datasets: [{
@@ -137,108 +112,114 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6 space-y-6">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-4 rounded-xl shadow">
+    // Container principal continua igual, definindo o limite da tela
+    <div className="bg-gray-50 p-4 w-full h-screen flex flex-col gap-4">
+      {/* KPIs (sem alteração) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-3 rounded-xl shadow">
           <p className="text-gray-500 text-sm">Total de produtos</p>
-          <h2 className="text-3xl font-bold mt-1">{kpis.totalProdutos}</h2>
-          <p className="text-gray-400 text-xs mt-1">Itens Cadastrados</p>
+          <h2 className="text-2xl font-bold">{kpis.totalProdutos}</h2>
+          <p className="text-gray-400 text-xs">Itens Cadastrados</p>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white p-3 rounded-xl shadow">
           <p className="text-gray-500 text-sm">Número de vendas</p>
-          <h2 className="text-3xl font-bold mt-1">{kpis.numeroVendas}</h2>
-          <p className="text-gray-400 text-xs mt-1">Vendas Registradas</p>
+          <h2 className="text-2xl font-bold">{kpis.numeroVendas}</h2>
+          <p className="text-gray-400 text-xs">Vendas Registradas</p>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white p-3 rounded-xl shadow">
           <div className="flex items-center">
             <p className="text-gray-500 text-sm">Comparado ao mês passado</p>
             <span className={`ml-2 text-xs font-semibold ${parseFloat(kpis.comparadoMesPassado) >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'} rounded-full px-2 py-0.5`}>
               {kpis.comparadoMesPassado}
             </span>
           </div>
-          <h2 className="text-3xl font-bold mt-1">{kpis.vendasAMais >= 0 ? `+${kpis.vendasAMais}` : kpis.vendasAMais}</h2>
-          <p className="text-gray-400 text-xs mt-1">
+          <h2 className="text-2xl font-bold">{kpis.vendasAMais >= 0 ? `+${kpis.vendasAMais}` : kpis.vendasAMais}</h2>
+          <p className="text-gray-400 text-xs">
             {Math.abs(kpis.vendasAMais) === 1 ? 'Venda a mais' : 'Vendas a mais'}
           </p>
         </div>
-        <div className="bg-white p-4 rounded-xl shadow">
+        <div className="bg-white p-3 rounded-xl shadow">
           <p className="text-gray-500 text-sm">Pagamentos pendentes</p>
-          <h2 className="text-3xl font-bold mt-1">{kpis.pagamentosPendentes}</h2>
-          <p className="text-gray-400 text-xs mt-1">Clientes em débito</p>
+          <h2 className="text-2xl font-bold">{kpis.pagamentosPendentes}</h2>
+          <p className="text-gray-400 text-xs">Clientes em débito</p>
         </div>
       </div>
 
-      {/* Vendas por mês */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Vendas por mês</h2>
-          <div className="flex items-center space-x-4 text-sm">
-            <button 
-              onClick={() => handleBotaoGraficoClick('quantidade')} 
-              className={`flex items-center transition-colors ${(graficoVisivel === 'quantidade' || graficoVisivel === 'both') ? 'text-yellow-500 font-semibold' : 'text-gray-400'}`}
-            >
-              <div className="w-3 h-3 rounded-sm bg-yellow-400 mr-2"></div>
-              Quantidade vendida
-            </button>
-            <button 
-              onClick={() => handleBotaoGraficoClick('valor')} 
-              className={`flex items-center transition-colors ${(graficoVisivel === 'valor' || graficoVisivel === 'both') ? 'text-purple-500 font-semibold' : 'text-gray-400'}`}
-            >
-              <div className="w-3 h-3 rounded-sm bg-purple-400 mr-2"></div>
-              Valor vendido
-            </button>
+      {/* NOVO WRAPPER: Esta div vai agrupar os dois blocos de baixo e ocupar o resto da tela */}
+      <div className="flex-1 flex flex-col gap-4 min-h-0">
+
+        {/* Vendas por mês - Card com altura EXPLÍCITA de 40% (h-2/5) do wrapper */}
+        <div className="bg-white p-4 rounded-xl shadow flex flex-col h-2/5">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-bold">Vendas por mês</h2>
+            <div className="flex items-center space-x-4 text-sm">
+              <button onClick={() => handleBotaoGraficoClick('quantidade')} className={`flex items-center transition-colors ${(graficoVisivel === 'quantidade' || graficoVisivel === 'both') ? 'text-yellow-500 font-semibold' : 'text-gray-400'}`}>
+                <div className="w-3 h-3 rounded-sm bg-yellow-400 mr-2"></div>
+                Quantidade vendida
+              </button>
+              <button onClick={() => handleBotaoGraficoClick('valor')} className={`flex items-center transition-colors ${(graficoVisivel === 'valor' || graficoVisivel === 'both') ? 'text-purple-500 font-semibold' : 'text-gray-400'}`}>
+                <div className="w-3 h-3 rounded-sm bg-purple-400 mr-2"></div>
+                Valor vendido
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="h-72">
+          {/* Container do gráfico com flex-1 para ocupar o espaço do card PAI */}
+          <div className="flex-1 relative">
             <Bar data={vendasChartData} options={vendasChartOptions} />
+          </div>
         </div>
-      </div>
 
-      {/* Últimas Vendas + Tipos de Produtos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-lg font-bold mb-4">Últimas vendas</h2>
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="text-gray-400 font-semibold">
-                <th className="p-2 font-semibold">Cliente</th>
-                <th className="p-2 font-semibold">Data</th>
-                <th className="p-2 font-semibold">Valor</th>
-                <th className="p-2 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ultimasVendas.map((v, i) => (
-                <tr key={i} className="border-t">
-                  <td className="p-2 font-medium text-gray-800">{v.cliente}</td>
-                  <td className="p-2 text-gray-500">{v.data}</td>
-                  <td className="p-2 text-gray-500">R$ {v.valor.toFixed(2).replace('.', ',')}</td>
-                  <td className="p-2"><StatusBadge status={v.status} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-lg font-bold mb-4">Tipos de Produtos</h2>
-          <div className="flex items-center justify-center space-x-8 h-full">
-            <div className="relative h-48 w-48">
-              <Doughnut data={produtosChartData} options={produtosChartOptions} />
+        {/* Últimas Vendas + Tipos de Produtos - Grid com altura EXPLÍCITA de 60% (h-3/5) do wrapper */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-3/5">
+          {/* Últimas Vendas */}
+          <div className="bg-white p-4 rounded-xl shadow flex flex-col">
+            <h2 className="text-lg font-bold mb-2">Últimas vendas</h2>
+            <div className="flex-grow overflow-auto"> {/* Scroll interno se necessário */}
+              <table className="w-full text-left text-sm">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="text-gray-400">
+                    <th className="p-2 font-semibold">Cliente</th>
+                    <th className="p-2 font-semibold">Data</th>
+                    <th className="p-2 font-semibold">Valor</th>
+                    <th className="p-2 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ultimasVendas.map((v, i) => (
+                    <tr key={i} className="border-t">
+                      <td className="p-2 font-medium text-gray-800">{v.cliente}</td>
+                      <td className="p-2 text-gray-500">{v.data}</td>
+                      <td className="p-2 text-gray-500">R$ {v.valor.toFixed(2).replace('.', ',')}</td>
+                      <td className="p-2"><StatusBadge status={v.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="w-1/2 space-y-3">
+          </div>
+
+          {/* Tipos de Produtos */}
+          <div className="bg-white p-4 rounded-xl shadow flex flex-col">
+            <h2 className="text-lg font-bold mb-2">Tipos de Produtos</h2>
+            <div className="flex-grow flex items-center justify-center space-x-6">
+              <div className="relative h-32 w-32">
+                  <Doughnut data={produtosChartData} options={produtosChartOptions} />
+              </div>
+              <div className="text-sm space-y-2">
               {tiposDeProdutos.map((p, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
+                  <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: produtosChartData.datasets[0].backgroundColor[index] }}></div>
-                    <span className="text-gray-600">{p.tipo}</span>
+                      <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: produtosChartData.datasets[0].backgroundColor[index] }}></div>
+                      <span className="text-gray-600">{p.tipo}</span>
                   </div>
-                  <span className="font-bold text-gray-800">{p.percentual.toFixed(1)}%</span>
-                </div>
+                  <span className="font-bold text-gray-800 ml-4">{p.percentual.toFixed(1)}%</span>
+                  </div>
               ))}
+              </div>
             </div>
           </div>
         </div>
+        
       </div>
     </div>
   );

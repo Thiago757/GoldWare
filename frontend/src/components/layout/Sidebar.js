@@ -6,6 +6,8 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import { RxDashboard } from 'react-icons/rx';
 import { CiShoppingTag, CiDeliveryTruck, CiUser, CiMoneyBill, CiSettings, CiLogout } from 'react-icons/ci';
 import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical } from 'react-icons/bs';
+import { useReports } from '../../context/ReportProvider';
+import { IoDocumentTextOutline } from 'react-icons/io5';
 
 const getInitials = (name = '') => {
     const names = name.split(' ');
@@ -17,6 +19,7 @@ const getInitials = (name = '') => {
 
 function Sidebar() {
     const { user, logout } = useContext(AuthContext); 
+    const { openReportManager } = useReports();
     const [isMenuOpen, setMenuOpen] = useState(false);
     const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
     const menuRef = useRef(null);
@@ -44,7 +47,7 @@ function Sidebar() {
         setLogoutModalOpen(false);
     };
 
-     return (
+    return (
         <>
             <aside className="sidebar">
                 <div className="sidebar-header">
@@ -102,6 +105,11 @@ function Sidebar() {
                         </li>
                         <li className={location.pathname === '/pagamentos' ? 'active' : ''}>
                             <Link to="/pagamentos"><CiMoneyBill /> Pagamentos</Link>
+                        </li>
+                        <li>
+                            <button onClick={openReportManager} className="sidebar-nav-button">
+                                <IoDocumentTextOutline /> Relatórios
+                            </button>
                         </li>
                     </ul>
                 </nav>
