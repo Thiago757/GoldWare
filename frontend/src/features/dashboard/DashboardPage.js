@@ -41,7 +41,7 @@ const StatusBadge = ({ status }) => {
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
-  const [metricaVendas, setMetricaVendas] = useState("valor");
+  const [graficoVisivel, setGraficoVisivel] = useState('both');
 
   useEffect(() => {
     axios.get("http://localhost:3001/api/dashboard/data")
@@ -49,32 +49,83 @@ export default function DashboardPage() {
       .catch((err) => console.error("Erro ao buscar dados:", err));
   }, []);
 
+  const handleBotaoGraficoClick = (metrica) => {
+    if (graficoVisivel === metrica) {
+      setGraficoVisivel('both');
+    } else {
+      setGraficoVisivel(metrica);
+    }
+  };
+
   if (!data) return <p className="p-6">Carregando...</p>;
 
   const { kpis, vendasPorMes, ultimasVendas, tiposDeProdutos } = data;
+  
+  const datasetsVendas = [];
 
-  // === Configurações do Gráfico de Vendas por Mês ===
-  const mesAtual = new Date().toLocaleString('en-US', { month: 'short' });
+  // --- ALTERAÇÃO AQUI: Adicionado yAxisID ---
+  if (graficoVisivel === 'quantidade' || graficoVisivel === 'both') {
+    datasetsVendas.push({
+      label: "Quantidade vendida",
+      data: vendasPorMes.map(v => v.quantidade),
+      backgroundColor: "#FACC15",
+      borderRadius: 6,
+      yAxisID: 'y1', // <-- Associa este dataset ao novo eixo Y da direita
+    });
+  }
+
+  if (graficoVisivel === 'valor' || graficoVisivel === 'both') {
+    datasetsVendas.push({
+      label: "Valor vendido",
+      data: vendasPorMes.map(v => v.valor),
+      backgroundColor: "#A78BFA",
+      borderRadius: 6,
+      yAxisID: 'y', // <-- Associa este dataset ao eixo Y padrão da esquerda
+    });
+  }
+  
   const vendasChartData = {
     labels: vendasPorMes.map(v => v.mes),
-    datasets: [{
-      label: metricaVendas === 'valor' ? "Valor vendido" : "Quantidade vendida",
-      data: vendasPorMes.map(v => metricaVendas === 'valor' ? v.valor : v.quantidade),
-      backgroundColor: vendasPorMes.map(v => v.mes === mesAtual ? '#A78BFA' : '#E9D5FF'),
-      borderRadius: 6,
-    }],
+    datasets: datasetsVendas,
   };
+  
+  // --- GRANDE ALTERAÇÃO AQUI: Configuração dos dois eixos Y ---
   const vendasChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
-    scales: { 
-        y: { beginAtZero: true },
-        x: { grid: { display: false } }
+    scales: {
+      x: { grid: { display: false } },
+      // Eixo Y padrão (esquerda) para VALOR
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        beginAtZero: true,
+        grid: {
+            drawOnChartArea: true, // Mantém as linhas de grade para este eixo
+        },
+        ticks: {
+            // Formata os números como moeda
+            callback: function(value) {
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+            }
+        }
+      },
+      // Novo Eixo Y (direita) para QUANTIDADE
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        beginAtZero: true,
+        // Garante que a grade deste eixo não polua o gráfico
+        grid: {
+          drawOnChartArea: false, 
+        },
+      },
     },
   };
 
-  // === Configurações do Gráfico de Tipos de Produtos ===
   const produtosChartData = {
     labels: tiposDeProdutos.map(p => p.tipo),
     datasets: [{
@@ -112,12 +163,10 @@ export default function DashboardPage() {
               {kpis.comparadoMesPassado}
             </span>
           </div>
-          {/* ---- NOVO BLOCO DE CÓDIGO AQUI ---- */}
           <h2 className="text-3xl font-bold mt-1">{kpis.vendasAMais >= 0 ? `+${kpis.vendasAMais}` : kpis.vendasAMais}</h2>
           <p className="text-gray-400 text-xs mt-1">
             {Math.abs(kpis.vendasAMais) === 1 ? 'Venda a mais' : 'Vendas a mais'}
           </p>
-          {/* ---- FIM DO NOVO BLOCO ---- */}
         </div>
         <div className="bg-white p-4 rounded-xl shadow">
           <p className="text-gray-500 text-sm">Pagamentos pendentes</p>
@@ -131,11 +180,17 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Vendas por mês</h2>
           <div className="flex items-center space-x-4 text-sm">
-            <button onClick={() => setMetricaVendas('quantidade')} className={`flex items-center transition-colors ${metricaVendas === 'quantidade' ? 'text-yellow-500 font-semibold' : 'text-gray-400'}`}>
+            <button 
+              onClick={() => handleBotaoGraficoClick('quantidade')} 
+              className={`flex items-center transition-colors ${(graficoVisivel === 'quantidade' || graficoVisivel === 'both') ? 'text-yellow-500 font-semibold' : 'text-gray-400'}`}
+            >
               <div className="w-3 h-3 rounded-sm bg-yellow-400 mr-2"></div>
               Quantidade vendida
             </button>
-            <button onClick={() => setMetricaVendas('valor')} className={`flex items-center transition-colors ${metricaVendas === 'valor' ? 'text-purple-500 font-semibold' : 'text-gray-400'}`}>
+            <button 
+              onClick={() => handleBotaoGraficoClick('valor')} 
+              className={`flex items-center transition-colors ${(graficoVisivel === 'valor' || graficoVisivel === 'both') ? 'text-purple-500 font-semibold' : 'text-gray-400'}`}
+            >
               <div className="w-3 h-3 rounded-sm bg-purple-400 mr-2"></div>
               Valor vendido
             </button>
