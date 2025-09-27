@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // <-- CORRIGIDO: adicionado o useState
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -10,7 +10,7 @@ import {
   Legend,
   ArcElement
 } from "chart.js";
-import { Bar, Doughnut } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2"; // <-- CORRIGIDO: hífen simples
 
 ChartJS.register(
   CategoryScale,
@@ -63,14 +63,13 @@ export default function DashboardPage() {
   
   const datasetsVendas = [];
 
-  // --- ALTERAÇÃO AQUI: Adicionado yAxisID ---
   if (graficoVisivel === 'quantidade' || graficoVisivel === 'both') {
     datasetsVendas.push({
       label: "Quantidade vendida",
       data: vendasPorMes.map(v => v.quantidade),
       backgroundColor: "#FACC15",
       borderRadius: 6,
-      yAxisID: 'y1', // <-- Associa este dataset ao novo eixo Y da direita
+      yAxisID: 'y',
     });
   }
 
@@ -80,7 +79,7 @@ export default function DashboardPage() {
       data: vendasPorMes.map(v => v.valor),
       backgroundColor: "#A78BFA",
       borderRadius: 6,
-      yAxisID: 'y', // <-- Associa este dataset ao eixo Y padrão da esquerda
+      yAxisID: 'y1',
     });
   }
   
@@ -89,39 +88,34 @@ export default function DashboardPage() {
     datasets: datasetsVendas,
   };
   
-  // --- GRANDE ALTERAÇÃO AQUI: Configuração dos dois eixos Y ---
   const vendasChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { display: false } },
-      // Eixo Y padrão (esquerda) para VALOR
       y: {
         type: 'linear',
-        display: true,
+        display: graficoVisivel === 'quantidade' || graficoVisivel === 'both',
         position: 'left',
         beginAtZero: true,
         grid: {
-            drawOnChartArea: true, // Mantém as linhas de grade para este eixo
+          drawOnChartArea: true,
+        },
+      },
+      y1: {
+        type: 'linear',
+        display: graficoVisivel === 'valor' || graficoVisivel === 'both',
+        position: 'right',
+        beginAtZero: true,
+        grid: {
+          drawOnChartArea: false, 
         },
         ticks: {
-            // Formata os números como moeda
             callback: function(value) {
                 return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
             }
         }
-      },
-      // Novo Eixo Y (direita) para QUANTIDADE
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        beginAtZero: true,
-        // Garante que a grade deste eixo não polua o gráfico
-        grid: {
-          drawOnChartArea: false, 
-        },
       },
     },
   };
