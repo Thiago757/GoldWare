@@ -113,4 +113,4 @@ exports.getDashboardData = async (req, res) => {
     console.error("Erro ao buscar dados do dashboard no banco:", error);
     res.status(500).json({ message: "Erro interno no servidor ao consultar o banco de dados." });
   }
-};
+}; 

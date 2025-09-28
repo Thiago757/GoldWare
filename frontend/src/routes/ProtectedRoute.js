@@ -35,6 +35,6 @@ const ProtectedRoute = ({ children }) => {
             </main>
         </div>
     );
-};
+}; 
 
 export default ProtectedRoute;

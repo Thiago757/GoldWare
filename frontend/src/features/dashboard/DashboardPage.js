@@ -19,7 +19,7 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend 
 );
 
 // Componente auxiliar para os Badges de Status

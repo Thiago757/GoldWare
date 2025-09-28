@@ -45,4 +45,4 @@ exports.gerarContasPagar = async (req, res) => {
     console.log('Gerando Contas a Pagar:', req.query);
     // TODO: Adicionar lógica SQL aqui
     res.status(200).send(`(Backend) Relatório de Contas a Pagar [${formato}] com status ${status} para fornecedor ${fornecedor || 'Todos'}.`);
-};
+}; 

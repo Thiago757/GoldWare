@@ -18,4 +18,4 @@ router.get('/lista-clientes', relatoriosController.gerarListaClientes);
 router.get('/contas-receber', relatoriosController.gerarContasReceber);
 router.get('/contas-pagar', relatoriosController.gerarContasPagar); // Rota Adicionada
 
-module.exports = router;
+module.exports = router; 
