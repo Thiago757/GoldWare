@@ -6,6 +6,7 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import { RxDashboard } from 'react-icons/rx';
 import { CiShoppingTag, CiDeliveryTruck, CiUser, CiMoneyBill, CiSettings, CiLogout } from 'react-icons/ci';
 import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical } from 'react-icons/bs';
+import { IoDocumentTextOutline } from 'react-icons/io5';
 
 const getInitials = (name = '') => {
     const names = name.split(' ');
@@ -44,7 +45,7 @@ function Sidebar() {
         setLogoutModalOpen(false);
     };
 
-     return (
+    return (
         <>
             <aside className="sidebar">
                 <div className="sidebar-header">
@@ -103,6 +104,10 @@ function Sidebar() {
                         <li className={location.pathname === '/pagamentos' ? 'active' : ''}>
                             <Link to="/pagamentos"><CiMoneyBill /> Pagamentos</Link>
                         </li>
+                        
+                        <li className={location.pathname === '/relatorios' ? 'active' : ''}>
+                            <Link to="/relatorios"><IoDocumentTextOutline /> Relatórios</Link>
+                        </li>
                     </ul>
                 </nav>
 
@@ -119,4 +124,4 @@ function Sidebar() {
         </>
     );
 }
-export default Sidebar;
+export default Sidebar; 

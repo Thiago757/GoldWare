@@ -190,6 +190,8 @@
     color: #1e293b;
 }
 
+
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -199,4 +201,38 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Adicione estas regras ao FINAL do seu ficheiro Sidebar.css */
+
+.sidebar-nav li button.sidebar-nav-button {
+    /* Copia os estilos dos links para o botão */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+
+    /* Estilos específicos de botão */
+    background: none;
+    border: none;
+    width: 100%; 
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+}
+
+.sidebar-nav li button.sidebar-nav-button:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.sidebar-nav li button.sidebar-nav-button svg {
+    font-size: 20px;
 }
