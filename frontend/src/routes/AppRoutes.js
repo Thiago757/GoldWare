@@ -15,7 +15,7 @@ import FornecedoresPage from '../features/fornecedores/FornecedoresPage';
 import PagamentosPage from '../features/pagamentos/PagamentosPage';
 import PerfilPage from '../features/perfil/PerfilPage';
 import ConfiguracoesPage from '../features/configuracoes/ConfiguracoesPage';
-import RelatoriosPage from '../features/relatorios/relatoriosPage';
+import RelatoriosPage from '../features/relatorios/RelatoriosPage';
 
 
 function AppRoutes() {
