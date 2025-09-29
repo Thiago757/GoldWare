@@ -10,15 +10,19 @@ export const VendaProvider = ({ children }) => {
     const { token } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // Função interna para buscar os dados mais recentes de uma venda no backend
-    const carregarVendaAtiva = async (id_venda) => {
+   const carregarVendaAtiva = async (id_venda) => {
         const response = await fetch(`http://localhost:3001/api/vendas/aberta/${id_venda}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Falha ao carregar dados da venda');
         const vendaData = await response.json();
-        const clienteFormatado = { value: vendaData.id_cliente, label: vendaData.nome_cliente };
-        setVendaAtiva({ ...vendaData, cliente: clienteFormatado });
+
+        const clientePadronizado = {
+            id_cliente: vendaData.id_cliente,
+            nome: vendaData.nome_cliente 
+        };
+
+        setVendaAtiva({ ...vendaData, cliente: clientePadronizado });
     };
 
     const iniciarNovaVenda = async (cliente) => {

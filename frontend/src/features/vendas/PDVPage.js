@@ -27,7 +27,9 @@ function PDVPage() {
      useEffect(() => {
         if (vendaAtiva?.cliente?.nome) {
             setNomeCliente(vendaAtiva.cliente.nome);
-        }
+        } else if (vendaAtiva?.nome_cliente) {
+        setNomeCliente(vendaAtiva.nome_cliente);
+    }
     }, [vendaAtiva]);
 
     useEffect(() => {

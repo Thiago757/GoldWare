@@ -284,7 +284,12 @@ exports.getVendaDetalhes = async (req, res) => {
         const { id } = req.params;
 
         const [vendaResult, itensResult, parcelasResult] = await Promise.all([
-            pool.query(`SELECT v.*, c.nome AS nome_cliente 
+            pool.query(`SELECT v.*, 
+                        c.nome || ' - CPF: ' || 
+                            SUBSTRING(c.cpf, 1, 3) || '.' ||
+                            SUBSTRING(c.cpf, 4, 3) || '.' || 
+                            SUBSTRING(c.cpf, 7, 3) || '-' || 
+                            SUBSTRING(c.cpf, 10, 2) AS nome_cliente
                         FROM vendas v 
                         LEFT JOIN clientes c ON v.id_cliente = c.id_cliente 
                         WHERE v.id_venda = $1`, [id]),
@@ -314,7 +319,12 @@ exports.getVendaAbertaDetalhes = async (req, res) => {
         const { id } = req.params;
         
         const [vendaResult, itensResult] = await Promise.all([
-            pool.query(`SELECT v.*, c.id_cliente, c.nome AS nome_cliente 
+            pool.query(`SELECT v.*, c.id_cliente, 
+                        c.nome || ' - CPF: ' || 
+                            SUBSTRING(c.cpf, 1, 3) || '.' ||
+                            SUBSTRING(c.cpf, 4, 3) || '.' || 
+                            SUBSTRING(c.cpf, 7, 3) || '-' || 
+                            SUBSTRING(c.cpf, 10, 2) AS nome_cliente
                         FROM vendas v 
                         JOIN clientes c ON v.id_cliente = c.id_cliente 
                         WHERE v.id_venda = $1 AND v.status = 'aberta'`, [id]),

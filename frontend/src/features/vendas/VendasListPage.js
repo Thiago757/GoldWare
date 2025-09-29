@@ -85,8 +85,8 @@ function VendasListPage() {
                 endDate = hoje;
                 break;
             case 'semana_atual':
-                startDate = startOfWeek(hoje, { weekStartsOn: 1 });
-                endDate = endOfWeek(hoje, { weekStartsOn: 1 });
+                startDate = startOfWeek(hoje, { weekStartsOn: 0 });
+                endDate = endOfWeek(hoje, { weekStartsOn: 0 });
                 break;
             case 'mes_atual':
                 startDate = startOfMonth(hoje);

@@ -26,10 +26,12 @@ ChartJS.register(
 const StatusBadge = ({ status }) => {
   const statusLower = status.toLowerCase();
   const statusStyles = {
-    pago: 'bg-green-100 text-green-800',
-    pendente: 'bg-yellow-100 text-yellow-800',
-    cancelado: 'bg-red-100 text-red-800',
-  };
+        'concluida': 'bg-green-100 text-green-800',
+        'cancelada': 'bg-red-100 text-red-800',
+        'devolvida': 'bg-sky-100 text-sky-800',
+        'aberta': 'bg-violet-100 text-violet-700',
+        'default': 'bg-slate-100 text-slate-600',
+    };
   const defaultStyle = 'bg-gray-100 text-gray-800';
 
   return (

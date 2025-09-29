@@ -12,7 +12,6 @@ import EstoquePage from '../features/estoque/EstoquePage';
 import MovimentacoesPage from '../features/movimentacoes/MovimentacoesPage';
 import ClientesPage from '../features/clientes/ClientesPage';
 import FornecedoresPage from '../features/fornecedores/FornecedoresPage';
-import PagamentosPage from '../features/pagamentos/PagamentosPage';
 import PerfilPage from '../features/perfil/PerfilPage';
 import ConfiguracoesPage from '../features/configuracoes/ConfiguracoesPage';
 import RelatoriosPage from '../features/relatorios/RelatoriosPage';
@@ -31,7 +30,6 @@ function AppRoutes() {
             <Route path="/movimentacoes" element={<ProtectedRoute><MovimentacoesPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />
             <Route path="/fornecedores" element={<ProtectedRoute><FornecedoresPage /></ProtectedRoute>} />
-            <Route path="/pagamentos" element={<ProtectedRoute><PagamentosPage /></ProtectedRoute>} />
             <Route path="/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
