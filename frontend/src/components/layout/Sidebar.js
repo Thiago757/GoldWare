@@ -101,10 +101,6 @@ function Sidebar() {
                         <li className={location.pathname === '/fornecedores' ? 'active' : ''}>
                             <Link to="/fornecedores"><CiDeliveryTruck /> Fornecedores</Link>
                         </li>
-                        <li className={location.pathname === '/pagamentos' ? 'active' : ''}>
-                            <Link to="/pagamentos"><CiMoneyBill /> Pagamentos</Link>
-                        </li>
-                        
                         <li className={location.pathname === '/relatorios' ? 'active' : ''}>
                             <Link to="/relatorios"><IoDocumentTextOutline /> Relatórios</Link>
                         </li>

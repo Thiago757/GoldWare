@@ -5,6 +5,7 @@ import { VendaContext } from '../../context/VendaContext';
 import ClienteSelectModal from '../../components/common/ClienteSelectModal';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import VendaDetalhesModal from '../../components/common/VendaDetalhesModal';
+import DevolucaoModal from '../../components/common/DevolucaoModal';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import ptBR from 'date-fns/locale/pt-BR';
 import { startOfWeek, endOfWeek, subWeeks, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
@@ -12,6 +13,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import './VendasListPage.css';
 import { FaEye, FaTimesCircle } from 'react-icons/fa';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+import { FaUndoAlt } from 'react-icons/fa';
 
 registerLocale('pt-BR', ptBR);
 
@@ -23,6 +25,8 @@ function VendasListPage() {
     const [vendaParaCancelar, setVendaParaCancelar] = useState(null);
     const [filtros, setFiltros] = useState({ startDate: null, endDate: null, status: '' });
     const [isDetalhesModalOpen, setDetalhesModalOpen] = useState(false);
+    const [isDevolucaoModalOpen, setDevolucaoModalOpen] = useState(false);
+    const [vendaParaDevolver, setVendaParaDevolver] = useState(null);
     const [vendaSelecionada, setVendaSelecionada] = useState(null);
     const [loadingDetalhes, setLoadingDetalhes] = useState(false);
     const [menuAbertoId, setMenuAbertoId] = useState(null);
@@ -30,7 +34,7 @@ function VendasListPage() {
     const [filtroPeriodo, setFiltroPeriodo] = useState('todos');
     
     const { token } = useContext(AuthContext);
-    const { iniciarNovaVenda } = useContext(VendaContext);
+    const { iniciarNovaVenda, retomarVenda } = useContext(VendaContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -81,8 +85,8 @@ function VendasListPage() {
                 endDate = hoje;
                 break;
             case 'semana_atual':
-                startDate = startOfWeek(hoje, { weekStartsOn: 1 });
-                endDate = endOfWeek(hoje, { weekStartsOn: 1 });
+                startDate = startOfWeek(hoje, { weekStartsOn: 0 });
+                endDate = endOfWeek(hoje, { weekStartsOn: 0 });
                 break;
             case 'mes_atual':
                 startDate = startOfMonth(hoje);
@@ -149,6 +153,36 @@ function VendasListPage() {
         }
     };
 
+const handleDevolverVenda = async (observacao) => {
+    if (!vendaParaDevolver || !observacao) {
+        alert("O motivo da devolução é obrigatório.");
+        return;
+    }
+    try {
+        const response = await fetch(`http://localhost:3001/api/vendas/${vendaParaDevolver.id_venda}/devolver`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ observacao })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Falha ao processar devolução.');
+        }
+
+        alert('Venda devolvida com sucesso!');
+        setDevolucaoModalOpen(false);
+        fetchVendas();
+
+    } catch (error) {
+        console.error("Erro ao processar devolução:", error);
+        alert(`Erro: ${error.message}`);
+    }
+};
+
     if (loading && vendas.length === 0) return <p>Carregando histórico de vendas...</p>;
 
     return (
@@ -187,9 +221,10 @@ function VendasListPage() {
                         <label>Status</label>
                         <select value={filtros.status} onChange={e => setFiltros({...filtros, status: e.target.value})} className="filtro-input">
                             <option value="">Todos</option>
-                            <option value="pago">Pago</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="cancelado">Cancelado</option>
+                            <option value="concluida">Concluida</option>
+                            <option value="cancelada">Cancelada</option>
+                            <option value="devolvida">Devolvida</option>
+                            <option value="aberta">Aberta</option>
                         </select>
                     </div>
                     <button onClick={fetchVendas} className="filtrar-btn">Filtrar</button>
@@ -208,28 +243,42 @@ function VendasListPage() {
                         </thead>
                         <tbody>
                             {vendas.map(venda => (
-                                <tr key={venda.id_venda}>
+                                <tr 
+                                    key={venda.id_venda} 
+                                    className={venda.status === 'aberta' ? 'linha-clicavel' : ''}
+                                    onClick={() => venda.status === 'aberta' && retomarVenda(venda.id_venda)}
+                                >
                                     <td>#{venda.id_venda}</td>
                                     <td>{new Date(venda.data_venda).toLocaleDateString('pt-BR')}</td>
                                     <td>{venda.nome_cliente || 'N/A'}</td>
                                     <td>R$ {parseFloat(venda.valor_total).toFixed(2)}</td>
-                                    <td><span className={`status-${(venda.status_pagamento || 'default').toLowerCase()}`}>{venda.status_pagamento || 'N/A'}</span></td>
+                                    <td><span className={`status-${(venda.status || 'default').toLowerCase()}`}>{venda.status}</span></td>
                                     <td className="coluna-acoes" ref={menuAbertoId === venda.id_venda ? acoesMenuRef : null}>
-                                        <button onClick={() => setMenuAbertoId(menuAbertoId === venda.id_venda ? null : venda.id_venda)} className="action-icon-btn">
+                                       <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation(); 
+                                                setMenuAbertoId(menuAbertoId === venda.id_venda ? null : venda.id_venda);
+                                            }} 
+                                            className="action-icon-btn">
                                             <BsThreeDotsVertical />
                                         </button>
                                         {menuAbertoId === venda.id_venda && (
                                             <div className="acoes-dropdown">
-                                                <button onClick={() => { handleVerDetalhes(venda.id_venda); setMenuAbertoId(null); }}>
+                                                <button onClick={(e) => {e.stopPropagation(); handleVerDetalhes(venda.id_venda); setMenuAbertoId(null); }}>
                                                     <FaEye /> Ver Detalhes
                                                 </button>
+                                                {venda.status === 'aberta' && (
                                                 <button 
-                                                    onClick={() => { setVendaParaCancelar(venda); setModalAberto(true); setMenuAbertoId(null); }}
-                                                    disabled={venda.status_pagamento === 'cancelado'}
+                                                    onClick={(e) => {e.stopPropagation(); setVendaParaCancelar(venda); setModalAberto(true); setMenuAbertoId(null); }}
+                                                    disabled={venda.status === 'cancelado'}
                                                     className="cancel-action"
                                                 >
                                                     <FaTimesCircle /> Cancelar Venda
                                                 </button>
+                                                )}
+                                                {venda.status === 'concluida' && (
+                                                <button onClick={() => { setVendaParaDevolver(venda); setDevolucaoModalOpen(true); setMenuAbertoId(null); }} className="cancel-action"> <FaUndoAlt/>Devolver Venda</button>
+                                                )}
                                             </div>
                                         )}
                                     </td>
@@ -242,6 +291,7 @@ function VendasListPage() {
             <ClienteSelectModal isOpen={isClienteModalOpen} onClose={() => setClienteModalOpen(false)} onConfirm={handleClienteSelecionado} />
             <ConfirmationModal isOpen={modalAberto} onClose={() => setModalAberto(false)} onConfirm={handleCancelarVenda} title="Confirmar Cancelamento" message={`Tem certeza que deseja cancelar a Venda #${vendaParaCancelar?.id_venda}? O estoque dos produtos será estornado.`} />
             <VendaDetalhesModal isOpen={isDetalhesModalOpen} onClose={() => setDetalhesModalOpen(false)} vendaData={vendaSelecionada} loading={loadingDetalhes} />
+            <DevolucaoModal isOpen={isDevolucaoModalOpen} onClose={() => setDevolucaoModalOpen(false)} onConfirm={handleDevolverVenda} venda={vendaParaDevolver} />
         </>
     );
 }

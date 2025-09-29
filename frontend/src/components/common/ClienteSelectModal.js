@@ -30,16 +30,23 @@ function ClienteSelectModal({ isOpen, onClose, onConfirm }) {
     };
 
     const handleConfirm = () => {
-        if (clienteSelecionado) {
-            onConfirm(clienteSelecionado);
-        }
-    };
+        console.log("LOG 1 (Dentro do Modal):", clienteSelecionado);
+    if (clienteSelecionado) {
+        onConfirm({
+            id_cliente: clienteSelecionado.value,
+            nome: clienteSelecionado.label
+        });
+    }
+};
 
     const handleClientSaved = (novoCliente) => {
-        setAddModalOpen(false);
-        const clienteFormatado = { value: novoCliente.id_cliente, label: novoCliente.nome };
-        setClienteSelecionado(clienteFormatado);
+    setAddModalOpen(false);
+    const clienteFormatado = { 
+        value: novoCliente.id_cliente, 
+        label: `${novoCliente.nome} - CPF: ${formatCPF(novoCliente.cpf)}` 
     };
+    setClienteSelecionado(clienteFormatado);
+};
 
     if (!isOpen) return null;
 

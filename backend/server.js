@@ -9,7 +9,6 @@ const produtoRoutes = require('./src/api/produtos');
 const dashboardRoutes = require('./src/api/dashboard');
 const vendaRoutes = require('./src/api/vendas');
 const clienteRoutes = require('./src/api/clientes');
-const pagamentoRoutes = require('./src/api/pagamentos');
 const app = express();
 const path = require('path');
 
@@ -23,7 +22,6 @@ app.use('/api/produtos', produtoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vendas', vendaRoutes);
 app.use('/api/clientes', clienteRoutes);
-app.use('/api/pagamentos', pagamentoRoutes);
 
 const PORT = process.env.PORT || 3001;
 

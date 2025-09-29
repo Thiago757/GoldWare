@@ -8,9 +8,10 @@ import ConfirmationModal from '../../components/common/ConfirmationModal';
 import PagamentoModal from '../../components/common/PagamentoModal';
 
 function PDVPage() {
-    const { vendaAtiva, addItem, removeItem, removeMultipleItems, clearVenda } = useContext(VendaContext);
+    const { vendaAtiva, addItem, removeItem, removeMultipleItems, updateItemQuantidade, limparVenda, loading: vendaLoading } = useContext(VendaContext);
     const { token } = useContext(AuthContext);
     const navigate = useNavigate();
+
     const [codigoLido, setCodigoLido] = useState('');
     const [subtotal, setSubtotal] = useState(0);
     const [desconto, setDesconto] = useState(0);
@@ -21,38 +22,48 @@ function PDVPage() {
     const [itemParaRemover, setItemParaRemover] = useState(null);
     const [modalAberto, setModalAberto] = useState(null);
     const [isPagamentoModalOpen, setPagamentoModalOpen] = useState(false);
+    const [nomeCliente, setNomeCliente] = useState('...');
+
+     useEffect(() => {
+        if (vendaAtiva?.cliente?.nome) {
+            setNomeCliente(vendaAtiva.cliente.nome);
+        } else if (vendaAtiva?.nome_cliente) {
+        setNomeCliente(vendaAtiva.nome_cliente);
+    }
+    }, [vendaAtiva]);
 
     useEffect(() => {
-        if (!vendaAtiva.cliente) {
-            console.warn("Nenhum cliente selecionado, redirecionando para a lista de vendas.");
+        if (!vendaLoading && (!vendaAtiva || !vendaAtiva.cliente)) {
+            console.warn("Nenhuma venda ativa encontrada após o carregamento, redirecionando.");
             navigate('/vendas');
+            return;
         }
         if (inputRef.current) {
             inputRef.current.focus();
         }
-    }, [vendaAtiva.cliente, navigate]);
+    }, [vendaAtiva, vendaLoading, navigate]);
 
     useEffect(() => {
-        const novoSubtotal = vendaAtiva.itens.reduce((acc, item) => acc + (item.preco_venda * item.quantidade), 0);
-        setSubtotal(novoSubtotal);
-        const valorDescontoNumerico = Number(desconto) || 0;
-        const valorDoDesconto = novoSubtotal * (valorDescontoNumerico / 100);
-        setTotal(novoSubtotal - valorDoDesconto);
-    }, [vendaAtiva.itens, desconto]);
+        if (vendaAtiva && vendaAtiva.itens) {
+            const itens = vendaAtiva.itens;
+            const novoSubtotal = itens.reduce((acc, item) => acc + (item.preco_venda * item.quantidade), 0);
+            setSubtotal(novoSubtotal);
+            const valorDescontoNumerico = Number(desconto) || 0;
+            const valorDoDesconto = novoSubtotal * (valorDescontoNumerico / 100);
+            setTotal(novoSubtotal - valorDoDesconto);
+        }
+    }, [vendaAtiva, desconto]);
 
     const handleScan = async (e) => {
         e.preventDefault();
         if (!codigoLido) return;
         try {
             const response = await fetch(`http://localhost:3001/api/produtos/barcode/${codigoLido}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             const produto = await response.json();
             if (!response.ok) throw new Error(produto.message || 'Produto não encontrado.');
             addItem(produto);
-            setError('');
         } catch (err) {
             setError(err.message);
             setTimeout(() => setError(''), 3000);
@@ -78,8 +89,8 @@ function PDVPage() {
     };
 
     const handleSelecaoTodos = (e) => {
-        if (e.target.checked) {
-            setItensSelecionados(vendaAtiva.itens.map(item => item.id_produto));
+        if (e.target.checked && vendaAtiva) {
+            setItensSelecionados(vendaAtiva.itens.map(item => item.id_item_venda));
         } else {
             setItensSelecionados([]);
         }
@@ -87,68 +98,99 @@ function PDVPage() {
 
     const handleConfirmaRemoverItem = () => {
         if (itemParaRemover) {
-            removeItem(itemParaRemover.id_produto);
+            removeItem(itemParaRemover.id_item_venda);
         }
         setModalAberto(null);
         setItemParaRemover(null);
     };
     
     const handleConfirmaRemoverSelecionados = () => {
-        removeMultipleItems(itensSelecionados);
-        setItensSelecionados([]);
-        setModalAberto(null);
-    };
-
-    const handleConfirmaCancelarVenda = () => {
-        clearVenda();
-        setDesconto(0);
-        setItensSelecionados([]);
-        setModalAberto(null);
-        navigate('/vendas');
-    };
-    
-    const handleFinalizarVenda = async (dadosPagamento) => {
-        const vendaParaEnviar = {
-            id_cliente: vendaAtiva.cliente?.value,
-            desconto: Number(desconto) || 0,
-            valor_total: total,
-            itens: vendaAtiva.itens.map(item => ({ id_produto: item.id_produto, quantidade: item.quantidade, preco_unitario: item.preco_venda, nome: item.nome })),
-            pagamentos: dadosPagamento.pagamentos.map(p => ({ forma: p.forma, valor: p.valor, parcelas: p.parcelas || 1 }))
-        };
-
-        try {
-            const response = await fetch('http://localhost:3001/api/vendas/finalizar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(vendaParaEnviar)
-            });
-            const data = await response.json();
-            if (!response.ok) { throw new Error(data.message || 'Falha ao registrar a venda.'); }
-            alert(`Venda #${data.id_venda} finalizada com sucesso!`);
-            clearVenda();
-            setPagamentoModalOpen(false);
-            navigate('/vendas');
-        } catch (error) {
-            console.error("Erro ao finalizar venda:", error);
-            alert(`Erro: ${error.message}`);
+        if (removeMultipleItems) { 
+            removeMultipleItems(itensSelecionados);
         }
+        setItensSelecionados([]);
+        setModalAberto(null);
     };
+
+   const handleConfirmaCancelarVenda = async () => {
+    if (!vendaAtiva || !vendaAtiva.id_venda) return;
+
+    try {
+        const response = await fetch(`http://localhost:3001/api/vendas/${vendaAtiva.id_venda}/cancelar`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error('Falha ao cancelar a venda no backend');
+        }
+
+        alert('Venda cancelada com sucesso!');
+        limparVenda();
+        navigate('/vendas'); 
+
+    } catch (error) {
+        console.error("Erro ao cancelar venda:", error);
+        alert(error.message);
+    }
+};
+    
+   const handleFinalizarVenda = async (dadosPagamento) => {
+    if (!vendaAtiva) return;
+
+    const vendaParaFinalizar = {
+        id_venda: vendaAtiva.id_venda,
+        desconto: Number(desconto) || 0,
+        pagamentos: dadosPagamento.pagamentos.map(p => ({
+            forma: p.forma,
+            valor: p.valor,
+            parcelas: p.parcelas || 1 
+        }))
+    };
+
+    try {
+        const response = await fetch('http://localhost:3001/api/vendas/finalizar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(vendaParaFinalizar)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Falha ao registrar a venda.');
+        }
+
+        alert(`Venda #${data.id_venda} finalizada com sucesso!`);
+
+        limparVenda();
+        setPagamentoModalOpen(false);
+        navigate('/vendas');
+
+    } catch (error) {
+        console.error("Erro ao finalizar venda:", error);
+        alert(`Erro: ${error.message}`);
+    }
+};
+
+    if (vendaLoading || !vendaAtiva) {
+        return <p>Carregando dados da venda...</p>;
+    }
 
     return (
         <>
             <div className="vendas-container">
                 <div className="pdv-header">
-                    <h2>Nova Venda para: {vendaAtiva.cliente?.label || '...'}</h2>
+                    <h2>Nova Venda para: {nomeCliente}</h2>
                 </div>
                 <div className="pdv-principal">
                     <form onSubmit={handleScan} className="scan-form">
                         <label htmlFor="barcode-input">Código de Barras</label>
                         <input
-                            ref={inputRef}
-                            id="barcode-input"
-                            type="text"
-                            value={codigoLido}
-                            onChange={(e) => setCodigoLido(e.target.value)}
+                            ref={inputRef} id="barcode-input" type="text"
+                            value={codigoLido} onChange={(e) => setCodigoLido(e.target.value)}
                             placeholder="Leia o código de barras ou digite e pressione Enter"
                         />
                     </form>
@@ -157,15 +199,42 @@ function PDVPage() {
                         <table>
                             <thead>
                                 <tr>
-                                    {vendaAtiva.itens.length >= 2 && ( <th className="coluna-checkbox"><input type="checkbox" onChange={handleSelecaoTodos} checked={itensSelecionados.length === vendaAtiva.itens.length && vendaAtiva.itens.length > 0} /></th> )}
+                                    <th className="coluna-checkbox"><input type="checkbox" onChange={handleSelecaoTodos} checked={vendaAtiva.itens.length > 0 && itensSelecionados.length === vendaAtiva.itens.length} /></th>
                                     <th>Produto</th><th>Qtd.</th><th>Preço Unit.</th><th>Subtotal</th><th>Ação</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {vendaAtiva.itens.map(item => (
-                                    <tr key={item.id_produto}>
-                                        {vendaAtiva.itens.length >= 2 && ( <td className="coluna-checkbox"><input type="checkbox" checked={itensSelecionados.includes(item.id_produto)} onChange={() => handleSelecaoItem(item.id_produto)} /></td> )}
-                                        <td>{item.nome}</td><td>{item.quantidade}</td><td>R$ {parseFloat(item.preco_venda).toFixed(2)}</td><td>R$ {(item.quantidade * item.preco_venda).toFixed(2)}</td>
+                                    <tr key={item.id_item_venda}>
+                                        <td className="coluna-checkbox"><input type="checkbox" checked={itensSelecionados.includes(item.id_item_venda)} onChange={() => handleSelecaoItem(item.id_item_venda)} /></td>
+                                        <td>{item.nome}</td>
+                                        <td>
+                                        <div className="counter">
+                                            <button
+                                            type="button"
+                                            onClick={() => updateItemQuantidade(item.id_item_venda, Math.max(1, item.quantidade - 1))}>
+                                            -
+                                            </button>
+                                            <input
+                                            type="number"
+                                            className="qtd-input"
+                                            value={item.quantidade}
+                                            min="1"
+                                            onChange={(e) => {
+                                                const novaQtd = Math.max(1, parseInt(e.target.value) || 1);
+                                                updateItemQuantidade(item.id_item_venda, novaQtd);
+                                            }}
+                                            />
+                                            <button
+                                            type="button"
+                                            onClick={() => updateItemQuantidade(item.id_item_venda, item.quantidade + 1)}
+                                            className="qtd-btn">
+                                            +
+                                            </button>
+                                        </div>
+                                        </td>
+                                        <td>R$ {parseFloat(item.preco_venda).toFixed(2)}</td>
+                                        <td>R$ {(item.quantidade * item.preco_venda).toFixed(2)}</td>
                                         <td><button onClick={() => { setItemParaRemover(item); setModalAberto('single'); }} className="remover-item-btn"><FaTrashAlt /></button></td>
                                     </tr>
                                 ))}
@@ -187,7 +256,7 @@ function PDVPage() {
             </div>
             <ConfirmationModal isOpen={modalAberto === 'single'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaRemoverItem} title="Remover Item" message={`Tem certeza que deseja remover o item "${itemParaRemover?.nome}" da venda?`} />
             <ConfirmationModal isOpen={modalAberto === 'multiple'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaRemoverSelecionados} title="Remover Itens Selecionados" message={`Tem certeza que deseja remover os ${itensSelecionados.length} itens selecionados?`} />
-            <ConfirmationModal isOpen={modalAberto === 'cancel'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaCancelarVenda} title="Cancelar Venda" message="Tem certeza que deseja cancelar a venda? Todos os itens serão removidos." />
+            <ConfirmationModal isOpen={modalAberto === 'cancel'} onClose={() => setModalAberto(null)} onConfirm={handleConfirmaCancelarVenda} title="Cancelar Venda" message="Tem certeza que deseja cancelar a venda?" />
             <PagamentoModal isOpen={isPagamentoModalOpen} onClose={() => setPagamentoModalOpen(false)} onFinalize={handleFinalizarVenda} totalVenda={total} />
         </>
     );

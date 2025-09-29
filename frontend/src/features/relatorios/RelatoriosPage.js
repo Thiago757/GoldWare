@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useReports } from '../../context/ReportProvider'; // Usamos para abrir o modal de parâmetros
 import { Search, Star, File, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
-// A configuração e a URL base podem ser importadas de um ficheiro partilhado no futuro
 const API_BASE_URL = 'http://localhost:3001';
 
 const relatoriosConfig = [
@@ -16,9 +15,6 @@ const relatoriosConfig = [
     { id: 'fluxo_caixa', titulo: 'Relatório de Fluxo de Caixa', endpoint: '/api/relatorios/fluxo-caixa', formatos: ['excel'], tags: ['Financeiro'], parametros: [{ name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }] }
 ];
 
-// O ReportManager ainda existirá globalmente, mas esta página vai chamar o modal de parâmetros
-// diretamente, se necessário. No entanto, para simplificar, vamos manter o fluxo de
-// abrir o modal de parâmetros a partir daqui também.
 
 export default function RelatoriosPage() {
     const [searchTerm, setSearchTerm] = useState('');

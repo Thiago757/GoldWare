@@ -12,7 +12,6 @@ import EstoquePage from '../features/estoque/EstoquePage';
 import MovimentacoesPage from '../features/movimentacoes/MovimentacoesPage';
 import ClientesPage from '../features/clientes/ClientesPage';
 import FornecedoresPage from '../features/fornecedores/FornecedoresPage';
-import PagamentosPage from '../features/pagamentos/PagamentosPage';
 import PerfilPage from '../features/perfil/PerfilPage';
 import ConfiguracoesPage from '../features/configuracoes/ConfiguracoesPage';
 import RelatoriosPage from '../features/relatorios/RelatoriosPage';
@@ -21,12 +20,9 @@ import RelatoriosPage from '../features/relatorios/RelatoriosPage';
 function AppRoutes() {
     return (
         <Routes>
-            {/* Rotas Públicas */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/esqueceu-senha" element={<ForgotPasswordPage />} />
             <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
-            
-            {/* Rotas Protegidas */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/vendas" element={<ProtectedRoute><VendasListPage /></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><PDVPage /></ProtectedRoute>} />
@@ -34,15 +30,9 @@ function AppRoutes() {
             <Route path="/movimentacoes" element={<ProtectedRoute><MovimentacoesPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />
             <Route path="/fornecedores" element={<ProtectedRoute><FornecedoresPage /></ProtectedRoute>} />
-            <Route path="/pagamentos" element={<ProtectedRoute><PagamentosPage /></ProtectedRoute>} />
-            
-            {/* ADIÇÃO 2: Adicione a nova rota de relatórios aqui */}
             <Route path="/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
-
             <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
-            
-            {/* Rota Padrão */}
             <Route path="/" element={<LoginPage />} />
         </Routes>
     );

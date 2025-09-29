@@ -1,18 +1,56 @@
--- ========= CRIAÇÃO DAS TABELAS =========
+CREATE TABLE estados (
+    id_estado SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    sigla VARCHAR(2) NOT NULL
+);
 
--- TABELA: Clientes
+CREATE TABLE cidades (
+    id_cidade SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    id_estado INT REFERENCES estados(id_estado),
+    uf VARCHAR(2) NOT NULL
+);
+
+CREATE TABLE categorias (
+    id_categoria SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE formas_pagamento (
+    id_forma_pagamento SERIAL PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE,
+    ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N'))
+);
+
+CREATE TABLE contas_bancarias (
+    id_conta_bancaria SERIAL PRIMARY KEY,
+    nome_conta VARCHAR(100) NOT NULL,
+    banco VARCHAR(50),
+    agencia VARCHAR(20),
+    numero_conta VARCHAR(30),
+    saldo NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+    ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N'))
+);
+
+-- ========= CRIAÇÃO DAS TABELAS PRINCIPAIS (com dependências) =========
+
 CREATE TABLE clientes (
     id_cliente SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(14) UNIQUE,
     telefone VARCHAR(20),
-    email VARCHAR(100),
-    endereco TEXT,
-    status VARCHAR(10) NOT NULL DEFAULT 'S' CHECK (status IN ('S', 'N')),
+    email VARCHAR(100) UNIQUE,
+    cep VARCHAR(9),
+    logradouro VARCHAR(255),
+    numero VARCHAR(20),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    id_cidade INT REFERENCES cidades(id_cidade),
+    id_estado INT REFERENCES estados(id_estado),
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TABELA: Fornecedores
 CREATE TABLE fornecedores (
     id_fornecedor SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -20,40 +58,37 @@ CREATE TABLE fornecedores (
     telefone VARCHAR(20),
     email VARCHAR(100),
     endereco TEXT,
+    id_cidade INT REFERENCES cidades(id_cidade),
     responsavel VARCHAR(100),
-    status VARCHAR(10) NOT NULL DEFAULT 'S' CHECK (status IN ('S', 'N')),
+    status VARCHAR(10) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TABELA: Produtos
 CREATE TABLE produtos (
     id_produto SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     preco_venda NUMERIC(10,2) NOT NULL,
     custo NUMERIC(10,2),
-    quantidade_estoque INT DEFAULT 0,
-    ativo VARCHAR(10) NOT NULL DEFAULT 'S' CHECK (ativo IN ('S', 'N')),
-    categoria VARCHAR(50),
-    codigo_barras VARCHAR(50) UNIQUE, -- Adicionado
-    imagem_url TEXT, -- Adicionado
+    quantidade_estoque INT NOT NULL DEFAULT 0,
+    ativo CHAR(1) NOT NULL DEFAULT 'S' CHECK (ativo IN ('S', 'N')),
+    id_categoria INT REFERENCES categorias(id_categoria),
+    codigo_barras VARCHAR(50) UNIQUE,
+    imagem_url TEXT,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TABELA: Movimentações de Estoque
-CREATE TABLE movimentacoes_estoque (
-    id_movimentacao SERIAL PRIMARY KEY,
-    id_produto INT NOT NULL REFERENCES produtos(id_produto),
-    tipo_movimentacao VARCHAR(10) NOT NULL CHECK (tipo_movimentacao IN ('entrada', 'saida')),
-    quantidade INT NOT NULL CHECK (quantidade > 0),
-    data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_fornecedor INT REFERENCES fornecedores(id_fornecedor),
-    usuario_responsavel VARCHAR(100),
-    origem VARCHAR(50),
-    observacao TEXT
+CREATE TABLE usuarios (
+    id_usuario SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    senha_hash TEXT NOT NULL,
+    tipo VARCHAR(20) CHECK (tipo IN ('admin', 'vendedor', 'estoquista')),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TABELA: Vendas
+-- ========= CRIAÇÃO DAS TABELAS TRANSACIONAIS =========
+
 CREATE TABLE vendas (
     id_venda SERIAL PRIMARY KEY,
     id_cliente INT REFERENCES clientes(id_cliente),
@@ -61,99 +96,217 @@ CREATE TABLE vendas (
     valor_total NUMERIC(10,2),
     desconto NUMERIC(10,2) DEFAULT 0,
     observacao TEXT,
-    status_pagamento VARCHAR(20) CHECK (status_pagamento IN ('pago', 'pendente', 'cancelado', 'parcial'))
+    status VARCHAR(20) NOT NULL DEFAULT 'aberta'
+        CHECK (status IN ('aberta','concluida','cancelada','devolvida'))
 );
 
--- TABELA: Itens da Venda
 CREATE TABLE itens_venda (
-    id_item SERIAL PRIMARY KEY,
-    id_venda INT REFERENCES vendas(id_venda) ON DELETE CASCADE,
-    id_produto INT REFERENCES produtos(id_produto),
-    nome_produto_snapshot VARCHAR(100),
+    id_item_venda SERIAL PRIMARY KEY,
+    id_venda INT NOT NULL REFERENCES vendas(id_venda) ON DELETE CASCADE,
+    id_produto INT NOT NULL REFERENCES produtos(id_produto),
     quantidade INT NOT NULL CHECK (quantidade > 0),
     preco_unitario NUMERIC(10,2) NOT NULL
 );
 
--- TABELA: Pagamentos
-CREATE TABLE pagamentos (
-    id_pagamento SERIAL PRIMARY KEY,
-    id_venda INT REFERENCES vendas(id_venda),
-    data_pagamento TIMESTAMP,
-    valor_pago NUMERIC(10,2),
-    forma_pagamento VARCHAR(50),
-    status VARCHAR(20) DEFAULT 'confirmado' CHECK (status IN ('confirmado', 'pendente', 'estornado', 'agendado')),
-    parcelas INT DEFAULT 1 -- Adicionado
+CREATE TABLE compras (
+    id_compra SERIAL PRIMARY KEY,
+    id_fornecedor INT NOT NULL REFERENCES fornecedores(id_fornecedor),
+    id_usuario_responsavel INT REFERENCES usuarios(id_usuario),
+    data_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    valor_total NUMERIC(10, 2) NOT NULL,
+    numero_nota_fiscal VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'recebido' CHECK (status IN ('pendente', 'recebido', 'cancelado'))
 );
 
--- TABELA: Usuários do sistema
-CREATE TABLE usuarios (
-    id_usuario SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
-    senha_hash TEXT NOT NULL,
-    tipo VARCHAR(20) CHECK (tipo IN ('admin', 'vendedor', 'estoquista')),
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    reset_token VARCHAR(255), -- Adicionado
-    reset_token_expires TIMESTAMP, -- Adicionado
-    avatar_url TEXT -- Adicionado
+CREATE TABLE itens_compra (
+    id_item_compra SERIAL PRIMARY KEY,
+    id_compra INT NOT NULL REFERENCES compras(id_compra) ON DELETE CASCADE,
+    id_produto INT NOT NULL REFERENCES produtos(id_produto),
+    quantidade INT NOT NULL CHECK (quantidade > 0),
+    custo_unitario NUMERIC(10, 2) NOT NULL
 );
 
--- TABELA: Contas a Receber (Parcelas)
+CREATE TABLE movimentacoes_estoque (
+    id_movimentacao SERIAL PRIMARY KEY,
+    id_produto INT NOT NULL REFERENCES produtos(id_produto),
+    tipo_movimentacao VARCHAR(10) NOT NULL CHECK (tipo_movimentacao IN ('entrada', 'saida', 'ajuste')),
+    quantidade INT NOT NULL,
+    data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_item_venda INT REFERENCES itens_venda(id_item_venda),
+    id_item_compra INT REFERENCES itens_compra(id_item_compra),
+    id_usuario_responsavel INT REFERENCES usuarios(id_usuario),
+    observacao TEXT
+);
+
+
 CREATE TABLE contas_a_receber (
-    id_conta SERIAL PRIMARY KEY,
+    id_conta_receber SERIAL PRIMARY KEY,
     id_venda INT NOT NULL REFERENCES vendas(id_venda),
     id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
+    id_os INT REFERENCES ordens_servico(id_os),
     numero_parcela INT NOT NULL,
     total_parcelas INT NOT NULL,
     valor_parcela NUMERIC(10, 2) NOT NULL,
+    valor_recebido NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     data_vencimento DATE NOT NULL,
     data_pagamento DATE,
-    status VARCHAR(20) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'atrasado'))
+    status VARCHAR(20) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'parcial', 'atrasado', 'cancelado'))
 );
 
+CREATE TABLE recebimento_venda (
+    id_recebimento SERIAL PRIMARY KEY,
+    id_conta_receber INT NOT NULL REFERENCES contas_a_receber(id_conta_receber),
+    id_conta_bancaria INT NOT NULL REFERENCES contas_bancarias(id_conta_bancaria),
+    id_forma_pagamento INT NOT NULL REFERENCES formas_pagamento(id_forma_pagamento),
+    valor_recebido NUMERIC(10,2) NOT NULL,
+    data_recebimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- ========= CRIAÇÃO DE TODOS OS ÍNDICES =========
+CREATE TABLE contas_a_pagar (
+    id_conta_pagar SERIAL PRIMARY KEY,
+    id_compra INT REFERENCES compras(id_compra),
+    id_fornecedor INT REFERENCES fornecedores(id_fornecedor),
+    descricao VARCHAR(255) NOT NULL,
+    valor NUMERIC(10, 2) NOT NULL,
+    valor_pago NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    data_emissao DATE DEFAULT CURRENT_DATE,
+    data_vencimento DATE NOT NULL,
+    data_quitacao DATE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'parcial', 'atrasado', 'cancelado'))
+);
 
--- ÍNDICES: Clientes
-[cite_start]CREATE INDEX idx_clientes_nome ON clientes(nome);
-[cite_start]CREATE INDEX idx_clientes_cpf ON clientes(cpf); 
-[cite_start]CREATE INDEX idx_clientes_status ON clientes(status);
+CREATE TABLE pagamento_compra (
+    id_pagamento_compra SERIAL PRIMARY KEY,
+    id_conta_pagar INT NOT NULL REFERENCES contas_a_pagar(id_conta_pagar),
+    id_conta_bancaria INT NOT NULL REFERENCES contas_bancarias(id_conta_bancaria),
+    id_forma_pagamento INT REFERENCES formas_pagamento(id_forma_pagamento),
+    valor_pago NUMERIC(10, 2) NOT NULL,
+    data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    observacao TEXT
+);
 
--- ÍNDICES: Fornecedores
-[cite_start]CREATE INDEX idx_fornecedores_nome ON fornecedores(nome);
-[cite_start]CREATE INDEX idx_fornecedores_status ON fornecedores(status);
+CREATE TABLE servicos (
+    id_servico SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco_base NUMERIC(10,2) NOT NULL,
+    prazo_estimado INT, -- em dias
+    ativo CHAR(1) NOT NULL DEFAULT 'S' CHECK (ativo IN ('S','N')),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
--- ÍNDICES: Produtos
-[cite_start]CREATE INDEX idx_produtos_nome ON produtos(nome);
-[cite_start]CREATE INDEX idx_produtos_categoria ON produtos(categoria);
-[cite_start]CREATE INDEX idx_produtos_ativo ON produtos(ativo);
-CREATE INDEX idx_produtos_codigo_barras ON produtos(codigo_barras);
+CREATE TABLE ordens_servico (
+    id_os SERIAL PRIMARY KEY,
+    id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
+    id_usuario_responsavel INT REFERENCES usuarios(id_usuario),
+    data_abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_conclusao TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'aberta'
+        CHECK (status IN ('aberta','em_andamento','concluida','cancelada')),
+    observacao TEXT
+);
 
--- ÍNDICES: Movimentações de Estoque
-[cite_start]CREATE INDEX idx_mov_produto ON movimentacoes_estoque(id_produto); 
-[cite_start]CREATE INDEX idx_mov_fornecedor ON movimentacoes_estoque(id_fornecedor); 
-[cite_start]CREATE INDEX idx_mov_data ON movimentacoes_estoque(data_movimentacao); 
-[cite_start]CREATE INDEX idx_mov_tipo ON movimentacoes_estoque(tipo_movimentacao); 
+CREATE TABLE itens_os (
+    id_item_os SERIAL PRIMARY KEY,
+    id_os INT NOT NULL REFERENCES ordens_servico(id_os) ON DELETE CASCADE,
+    id_servico INT NOT NULL REFERENCES servicos(id_servico),
+    quantidade INT NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+    preco_unitario NUMERIC(10,2) NOT NULL,
+    desconto NUMERIC(10,2) DEFAULT 0,
+    subtotal NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario - desconto) STORED
+);
+-- =======================================================================
+-- SEÇÃO DE TRIGGERS PARA AUTOMAÇÃO (Sintaxe para PostgreSQL)
+-- =======================================================================
 
--- ÍNDICES: Vendas
-[cite_start]CREATE INDEX idx_vendas_data ON vendas(data_venda); 
-[cite_start]CREATE INDEX idx_vendas_status ON vendas(status_pagamento); 
-[cite_start]CREATE INDEX idx_vendas_cliente ON vendas(id_cliente); 
+-- -----------------------------------------------------------------------
+-- Triggers para Atualização Automática de SALDO FINANCEIRO
+-- -----------------------------------------------------------------------
 
--- ÍNDICES: Itens da Venda
-[cite_start]CREATE INDEX idx_itens_venda_venda ON itens_venda(id_venda); 
-[cite_start]CREATE INDEX idx_itens_venda_produto ON itens_venda(id_produto); 
+-- Função para RECEBIMENTOS (Entradas)
+CREATE OR REPLACE FUNCTION atualizar_saldo_recebimento()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE contas_bancarias
+    SET saldo = saldo + NEW.valor_recebido
+    WHERE id_conta_bancaria = NEW.id_conta_bancaria;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
--- ÍNDICES: Pagamentos
-[cite_start]CREATE INDEX idx_pagamentos_data ON pagamentos(data_pagamento); 
-[cite_start]CREATE INDEX idx_pagamentos_status ON pagamentos(status); 
-[cite_start]CREATE INDEX idx_pagamentos_venda ON pagamentos(id_venda); 
+-- Trigger para a tabela recebimento_venda
+CREATE TRIGGER tg_after_insert_recebimento
+AFTER INSERT ON recebimento_venda
+FOR EACH ROW
+EXECUTE FUNCTION atualizar_saldo_recebimento();
 
--- ÍNDICES: Usuários
-[cite_start]CREATE INDEX idx_usuarios_email ON usuarios(email); 
-[cite_start]CREATE INDEX idx_usuarios_tipo ON usuarios(tipo); 
 
--- ÍNDICES: Contas a Receber
-CREATE INDEX idx_contas_a_receber_status ON contas_a_receber(status);
-CREATE INDEX idx_contas_a_receber_vencimento ON contas_a_receber(data_vencimento);
-CREATE INDEX idx_contas_a_receber_cliente ON contas_a_receber(id_cliente);
+-- Função para PAGAMENTOS (Saídas)
+CREATE OR REPLACE FUNCTION atualizar_saldo_pagamento()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE contas_bancarias
+    SET saldo = saldo - NEW.valor_pago
+    WHERE id_conta_bancaria = NEW.id_conta_bancaria;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para a tabela pagamento_compra
+CREATE TRIGGER tg_after_insert_pagamento
+AFTER INSERT ON pagamento_compra
+FOR EACH ROW
+EXECUTE FUNCTION atualizar_saldo_pagamento();
+
+
+-- -----------------------------------------------------------------------
+-- Trigger para Atualização Automática de SALDO DE ESTOQUE
+-- -----------------------------------------------------------------------
+
+-- Função para movimentações de estoque
+CREATE OR REPLACE FUNCTION atualizar_quantidade_estoque()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Lógica para INSERT
+    IF (TG_OP = 'INSERT') THEN
+        IF NEW.tipo_movimentacao = 'entrada' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque + NEW.quantidade WHERE id_produto = NEW.id_produto;
+        ELSIF NEW.tipo_movimentacao = 'saida' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque - NEW.quantidade WHERE id_produto = NEW.id_produto;
+        END IF;
+        RETURN NEW;
+
+    -- Lógica para DELETE (reverte a operação)
+    ELSIF (TG_OP = 'DELETE') THEN
+        IF OLD.tipo_movimentacao = 'entrada' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque - OLD.quantidade WHERE id_produto = OLD.id_produto;
+        ELSIF OLD.tipo_movimentacao = 'saida' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque + OLD.quantidade WHERE id_produto = OLD.id_produto;
+        END IF;
+        RETURN OLD;
+
+    -- Lógica para UPDATE (reverte a antiga e aplica a nova)
+    ELSIF (TG_OP = 'UPDATE') THEN
+        -- Reverte o valor antigo
+        IF OLD.tipo_movimentacao = 'entrada' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque - OLD.quantidade WHERE id_produto = OLD.id_produto;
+        ELSIF OLD.tipo_movimentacao = 'saida' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque + OLD.quantidade WHERE id_produto = OLD.id_produto;
+        END IF;
+        -- Aplica o novo valor
+        IF NEW.tipo_movimentacao = 'entrada' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque + NEW.quantidade WHERE id_produto = NEW.id_produto;
+        ELSIF NEW.tipo_movimentacao = 'saida' THEN
+            UPDATE produtos SET quantidade_estoque = quantidade_estoque - NEW.quantidade WHERE id_produto = NEW.id_produto;
+        END IF;
+        RETURN NEW;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para a tabela movimentacoes_estoque
+CREATE TRIGGER tg_atualizar_estoque
+AFTER INSERT OR DELETE OR UPDATE ON movimentacoes_estoque
+FOR EACH ROW
+EXECUTE FUNCTION atualizar_quantidade_estoque();

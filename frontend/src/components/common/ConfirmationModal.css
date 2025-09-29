@@ -8,13 +8,58 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-width: 400px;
     width: 90%; text-align: center; animation: fadeInModal 0.3s ease-out;
 }
-.modal-content h2 { 
-    margin-top: 0; 
-    margin-bottom: 20px; 
-    color: #1e293b;
- }
+.modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 500px; /* Garante que o modal não seja muito largo */
+    position: relative;
+    z-index: 1001; /* Acima do overlay */
+    text-align: left; /* Alinha o texto à esquerda, como na imagem */
+}
  
-.modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+.modal-content h2 {
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.modal-label {
+    display: block; /* Garante que o label ocupe sua própria linha */
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 0.95em;
+}
+
+.modal-textarea {
+    width: calc(100% - 20px); /* Ajusta para preencher a largura do modal */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    resize: vertical; /* Permite redimensionar verticalmente */
+    min-height: 80px; /* Altura mínima para o textarea */
+    box-sizing: border-box; /* Inclui padding e borda na largura total */
+}
+
+.modal-textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+}
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
 .modal-button { border: none; padding: 10px 25px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
 .modal-button.cancel { background-color: #e2e8f0; color: #475569; }
 .modal-button.cancel:hover { background-color: #cbd5e1; }
@@ -23,7 +68,7 @@
 .modal-button.confirm.save { background-color: #16a34a; }
 .modal-button.confirm.save:hover { background-color: #15803d; }
 @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-.modal-form-group { margin-bottom: 15px; }
+.modal-form-group { margin-bottom: 20px; }
 .modal-form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: #334155; }
 .modal-form-group input, 
 .modal-form-group .IMaskInput {

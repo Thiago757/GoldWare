@@ -30,7 +30,7 @@ exports.getDashboardData = async (req, res) => {
       `),
       // 3. Últimas vendas (para a tabela)
       pool.query(`
-        SELECT c.nome AS cliente, v.data_venda AS data, v.valor_total AS valor, COALESCE(car.status, 'pago') AS status
+        SELECT c.nome AS cliente, v.data_venda AS data, v.valor_total AS valor, v.status AS status
         FROM vendas v
         JOIN clientes c ON v.id_cliente = c.id_cliente
         LEFT JOIN contas_a_receber car ON car.id_venda = v.id_venda
