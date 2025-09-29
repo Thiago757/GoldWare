@@ -18,10 +18,12 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.544.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "pdfkit": "^0.17.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "react-barcode": "^1.6.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

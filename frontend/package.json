@@ -15,6 +15,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
+    "react-barcode": "^1.6.1",
     "react-chartjs-2": "^5.3.0",
     "react-currency-input-field": "^3.10.0",
     "react-datepicker": "^8.6.0",
@@ -53,11 +54,9 @@
     ]
   },
   "devDependencies": {
-    
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "postcss-loader": "^8.2.0",
     "tailwindcss": "^4.1.13"
   }
 }
- 

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
+import BarcodeModal from './components/BarcodeModal';
+import { FaBarcode } from 'react-icons/fa';
 import './EstoquePage.css';
 import '../vendas/VendasListPage.css'; 
 
@@ -14,6 +16,8 @@ function EstoquePage() {
     const [filtroNome, setFiltroNome] = useState('');
     const [filtroCodigoBarras, setFiltroCodigoBarras] = useState('');
     const [filtroStatus, setFiltroStatus] = useState('');
+    const [isBarcodeModalOpen, setBarcodeModalOpen] = useState(false);
+    const [produtoParaEtiqueta, setProdutoParaEtiqueta] = useState(null);
 
     const fetchProdutos = async () => {
         if (!token) return;
@@ -123,6 +127,11 @@ function EstoquePage() {
         }
     };
 
+     const handleAbreModalEtiqueta = (produto) => {
+        setProdutoParaEtiqueta(produto);
+        setBarcodeModalOpen(true);
+    };
+
     if (loading && produtos.length === 0) return <p>Carregando produtos...</p>;
 
     return (
@@ -178,6 +187,7 @@ function EstoquePage() {
                                 produto={produto}
                                 onEdit={() => handleAbreModalEdicao(produto)}
                                 onToggleStatus={() => handleUpdateStatus(produto)}
+                                onGenerateBarcode={() => handleAbreModalEtiqueta(produto)}
                             />
                         ))
                     ) : (
@@ -191,6 +201,11 @@ function EstoquePage() {
                 onClose={() => { setModalOpen(false); setProdutoEmEdicao(null); }}
                 produto={produtoEmEdicao}
                 onSave={handleSalvarProduto}
+            />
+            <BarcodeModal
+                isOpen={isBarcodeModalOpen}
+                onClose={() => setBarcodeModalOpen(false)}
+                produto={produtoParaEtiqueta}
             />
         </>
     );

@@ -1,0 +1,27 @@
+.barcode-modal {
+    text-align: center;
+}
+
+#etiqueta-para-imprimir {
+    padding: 20px;
+    border: 1px dashed #ccc;
+    margin-bottom: 20px;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #etiqueta-para-imprimir, #etiqueta-para-imprimir * {
+        visibility: visible;
+    }
+    #etiqueta-para-imprimir {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}

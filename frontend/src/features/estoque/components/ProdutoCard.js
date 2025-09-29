@@ -1,10 +1,11 @@
 import React from 'react';
 import { FaEdit } from 'react-icons/fa';
+import { FaBarcode } from 'react-icons/fa';
 import './ProdutoCard.css';
 
 const placeholderImage = 'https://i.imgur.com/gJZT2n2.png';
 
-function ProdutoCard({ produto, onEdit, onToggleStatus }) {
+function ProdutoCard({ produto, onEdit, onToggleStatus, onGenerateBarcode }) {
     const precoFormatado = `R$ ${parseFloat(produto.preco_venda).toFixed(2)}`;
     const statusClasse = produto.ativo === 'S' ? 'ativo' : 'inativo';
 
@@ -39,6 +40,9 @@ function ProdutoCard({ produto, onEdit, onToggleStatus }) {
             <div className="produto-acoes">
                 <button onClick={onEdit} className="edit-btn" title="Editar Produto">
                     <FaEdit />
+                </button>
+                <button onClick={onGenerateBarcode} title="Gerar Etiqueta">
+                    <FaBarcode />
                 </button>
                 <div className="toggle-switch">
                     <input 
