@@ -95,7 +95,9 @@ CREATE TABLE vendas (
     data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     valor_total NUMERIC(10,2),
     desconto NUMERIC(10,2) DEFAULT 0,
-    observacao TEXT
+    observacao TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'aberta'
+        CHECK (status IN ('aberta','concluida','cancelada','devolvida'))
 );
 
 CREATE TABLE itens_venda (
@@ -137,12 +139,11 @@ CREATE TABLE movimentacoes_estoque (
 );
 
 
--- ========= CRIAÇÃO DAS TABELAS FINANCEIRAS (LÓGICA FINAL) =========
-
 CREATE TABLE contas_a_receber (
     id_conta_receber SERIAL PRIMARY KEY,
     id_venda INT NOT NULL REFERENCES vendas(id_venda),
     id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
+    id_os INT REFERENCES ordens_servico(id_os),
     numero_parcela INT NOT NULL,
     total_parcelas INT NOT NULL,
     valor_parcela NUMERIC(10, 2) NOT NULL,
@@ -184,7 +185,36 @@ CREATE TABLE pagamento_compra (
     observacao TEXT
 );
 
+CREATE TABLE servicos (
+    id_servico SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco_base NUMERIC(10,2) NOT NULL,
+    prazo_estimado INT, -- em dias
+    ativo CHAR(1) NOT NULL DEFAULT 'S' CHECK (ativo IN ('S','N')),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE TABLE ordens_servico (
+    id_os SERIAL PRIMARY KEY,
+    id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
+    id_usuario_responsavel INT REFERENCES usuarios(id_usuario),
+    data_abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_conclusao TIMESTAMP,
+    status VARCHAR(20) NOT NULL DEFAULT 'aberta'
+        CHECK (status IN ('aberta','em_andamento','concluida','cancelada')),
+    observacao TEXT
+);
+
+CREATE TABLE itens_os (
+    id_item_os SERIAL PRIMARY KEY,
+    id_os INT NOT NULL REFERENCES ordens_servico(id_os) ON DELETE CASCADE,
+    id_servico INT NOT NULL REFERENCES servicos(id_servico),
+    quantidade INT NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+    preco_unitario NUMERIC(10,2) NOT NULL,
+    desconto NUMERIC(10,2) DEFAULT 0,
+    subtotal NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario - desconto) STORED
+);
 -- =======================================================================
 -- SEÇÃO DE TRIGGERS PARA AUTOMAÇÃO (Sintaxe para PostgreSQL)
 -- =======================================================================

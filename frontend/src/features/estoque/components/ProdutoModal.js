@@ -39,9 +39,9 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
+        setError('');
         const camposObrigatorios = ['nome', 'preco_venda', 'custo', 'quantidade_estoque', 'categoria'];
         for (const campo of camposObrigatorios) {
             if (!formData[campo]) {
@@ -49,8 +49,11 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                 return;
             }
         }
-        
-        onSave(formData, imagemSelecionada);
+        try {
+            await onSave(formData, imagemSelecionada);
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
@@ -59,10 +62,8 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                 <div className="modal-header">
                     <h2>{produto ? 'Editar Produto' : 'Cadastrar Novo Produto'}</h2>
                 </div>
-
                 <div className="modal-body">
-                    {error && <p className="error-message" style={{marginBottom: '20px'}}>{error}</p>}
-                    
+                    {error && <p className="error-message">{error}</p>}
                     <div className="form-grid">
                         <div className="form-group form-group-span-2">
                             <label htmlFor="nome">Nome do Produto*</label>
@@ -90,8 +91,8 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                         </div>
                         {produto && (
                             <div className="form-group form-group-span-2">
-                                <label htmlFor="codigo_barras">Código de Barras</label>
-                                <input type="text" name="codigo_barras" value={formData.codigo_barras || ''} readOnly disabled />
+                                <label>Código de Barras</label>
+                                <input type="text" value={formData.codigo_barras || ''} readOnly disabled />
                             </div>
                         )}
                         <div className="form-group form-group-span-2">
@@ -108,14 +109,12 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                         </div>
                     </div>
                 </div>
-                
                 <div className="modal-footer">
                     <button type="button" onClick={onClose} className="modal-button cancel">Cancelar</button>
-                    <button type="submit" className="modal-button confirm">Salvar</button>
+                    <button type="submit" className="modal-button confirm save">Salvar</button>
                 </div>
             </form>
         </div>
     );
 }
-
 export default ProdutoModal;

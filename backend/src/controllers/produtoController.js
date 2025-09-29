@@ -2,6 +2,8 @@ const pool = require('../config/database');
 const generateEAN13 = require('../utils/barcodeGenerator');
 const fs = require('fs').promises;
 const path = require('path'); 
+const PDFDocument = require('pdfkit');
+const bwipjs = require('bwip-js');
 
 exports.listarProdutos = async (req, res) => {
     try {
@@ -67,10 +69,6 @@ exports.findByBarcode = async (req, res) => {
 exports.createProduto = async (req, res) => {
     try {
         const { nome, descricao, preco_venda, custo, quantidade_estoque, categoria } = req.body;
-        
-        if (!nome || !preco_venda || !custo || !quantidade_estoque || !categoria) {
-            return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos (nome, preço de venda, custo, estoque, categoria).' });
-        }
         
         let imageUrl = null;
         if (req.file) {
@@ -185,5 +183,58 @@ exports.updateProduto = async (req, res) => {
     } catch (error) {
         console.error("Erro ao atualizar produto:", error);
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });
+    }
+};
+
+exports.exportarCodigosDeBarras = async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT nome, codigo_barras FROM produtos WHERE ativo = 'S' AND codigo_barras IS NOT NULL ORDER BY nome"
+        );
+        const produtos = result.rows;
+
+        if (produtos.length === 0) {
+            return res.status(404).send('Nenhum produto com código de barras encontrado para exportar.');
+        }
+
+        const doc = new PDFDocument({
+            size: 'A4',
+            margin: 50,
+            layout: 'portrait'
+        });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=codigos_de_barras.pdf');
+        doc.pipe(res);
+        doc.fontSize(16).text('Etiquetas de Código de Barras', { align: 'center' });
+        doc.moveDown(2);
+
+        for (const produto of produtos) {
+            try {
+                const png = await bwipjs.toBuffer({
+                    bcid: 'ean13', 
+                    text: produto.codigo_barras,
+                    scale: 3,
+                    height: 10,
+                    includetext: true,
+                    textxalign: 'center',
+                });
+
+                doc.fontSize(10).text(produto.nome, { width: 410, ellipsis: true });
+                doc.image(png, { width: 150 });
+                doc.moveDown(1.5);
+
+            } catch (err) {
+                console.error(`Erro ao gerar código de barras para ${produto.nome}:`, err);
+                doc.fontSize(8).fillColor('red').text(`Erro ao gerar código para: ${produto.nome}`);
+                doc.fillColor('black');
+            }
+        }
+
+        doc.end();
+
+    } catch (error) {
+        console.error("Erro ao exportar códigos de barras:", error);
+        res.status(500).send('Erro interno no servidor ao gerar o PDF.');
     }
 };

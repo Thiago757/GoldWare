@@ -13,31 +13,27 @@ function VendaDetalhesModal({ isOpen, onClose, vendaData, loading }) {
                     <>
                         <h2>Detalhes da Venda #{vendaData.detalhes.id_venda}</h2>
 
-                        {/* 📌 Informações principais iguais à listagem */}
                         <div className="details-grid">
                             <div><strong>Cliente:</strong> {vendaData.detalhes.nome_cliente || 'N/A'}</div>
                             <div><strong>Data:</strong> {new Date(vendaData.detalhes.data_venda).toLocaleString('pt-BR')}</div>
                             <div>
-                                <strong>Status:</strong>
-                                <span className={`status-${(vendaData.detalhes.status_pagamento || 'default').toLowerCase()}`}>
-                                    {vendaData.detalhes.status_pagamento}
+                                <strong>Status: </strong>
+                                <span className={`status-${(vendaData.detalhes.status || 'default').toLowerCase()}`}>
+                                    {vendaData.detalhes.status}
                                 </span>
                             </div>
                             <div><strong>Valor Total:</strong> R$ {parseFloat(vendaData.detalhes.valor_total).toFixed(2)}</div>
                         </div>
-
-                        {/* 📌 Lista de Itens comprados */}
                         <h4>Produtos Comprados</h4>
                         <div className="itens-list-scroll">
                             {(vendaData.itens || []).map(item => (
                                 <div key={item.id_item_venda} className="item-detail-row">
-                                    <span>{item.quantidade}x {item.nome_produto_snapshot || item.id_produto}</span>
+                                    <span>{item.quantidade} x {item.nome || item.id_produto}</span>
                                     <span>R$ {parseFloat(item.preco_unitario * item.quantidade).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* 📌 Parcelas/Pagamentos */}
                         <h4>Parcelas / Pagamentos</h4>
                         <div className="pagamentos-list">
                             {(vendaData.parcelas || []).map(parcela => (

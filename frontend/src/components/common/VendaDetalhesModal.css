@@ -35,3 +35,33 @@
 .item-detail-row:last-child, .pagamento-detail-row:last-child {
     border-bottom: none;
 }
+
+.status-concluida, .status-pago {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-cancelada {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pendente {
+    background-color: #fef3c7; 
+    color: #9a3412; 
+}
+
+.status-devolvida {
+    background-color: #e0f2fe;
+    color: #05476a;
+}
+
+.status-aberta {
+    background-color: #ebe8fd; 
+    color: #6d28d9;
+}
+
+.status-default {
+    background-color: #f1f5f9; 
+    color: #475569;
+}
