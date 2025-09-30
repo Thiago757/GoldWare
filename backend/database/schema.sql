@@ -187,6 +187,7 @@ CREATE TABLE pagamento_compra (
 
 CREATE TABLE servicos (
     id_servico SERIAL PRIMARY KEY,
+    id_tipo_servico INT REFERENCES tipos_servico(id_tipo_servico),
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     preco_base NUMERIC(10,2) NOT NULL,
@@ -214,6 +215,11 @@ CREATE TABLE itens_os (
     preco_unitario NUMERIC(10,2) NOT NULL,
     desconto NUMERIC(10,2) DEFAULT 0,
     subtotal NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario - desconto) STORED
+);
+
+CREATE TABLE tipos_servico (
+    id_tipo_servico SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
 );
 -- =======================================================================
 -- SEÇÃO DE TRIGGERS PARA AUTOMAÇÃO (Sintaxe para PostgreSQL)
