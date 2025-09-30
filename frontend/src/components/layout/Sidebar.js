@@ -4,7 +4,7 @@ import './Sidebar.css';
 import { AuthContext } from '../../context/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { RxDashboard } from 'react-icons/rx';
-import { CiShoppingTag, CiDeliveryTruck, CiUser, CiMoneyBill, CiSettings, CiLogout } from 'react-icons/ci';
+import { CiShoppingTag, CiDeliveryTruck, CiUser, CiSettings, CiLogout } from 'react-icons/ci';
 import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical, BsTools  } from 'react-icons/bs';
 import { IoDocumentTextOutline } from 'react-icons/io5';
 

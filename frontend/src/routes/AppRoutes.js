@@ -13,10 +13,12 @@ import MovimentacoesPage from '../features/movimentacoes/MovimentacoesPage';
 import ClientesPage from '../features/clientes/ClientesPage';
 import FornecedoresPage from '../features/fornecedores/FornecedoresPage';
 import PerfilPage from '../features/perfil/PerfilPage';
-import ConfiguracoesPage from '../features/configuracoes/ConfiguracoesPage';
+import SettingsPage from '../features/settings/SettingsPage';
+import TiposServicoSettingsPage from '../features/settings/TiposServicoSettingsPage';
 import RelatoriosPage from '../features/relatorios/RelatoriosPage';
-import ServicosPage from '../features/servicos/ServicosPage';
-
+import OrdensServicoListPage from '../features/servicos/OrdensServicoListPage';
+import CatalogoServicosPage from '../features/settings/CatalogoServicosPage';
+import OSDetailPage from '../features/servicos/OSDetailPage';
 
 function AppRoutes() {
     return (
@@ -27,14 +29,19 @@ function AppRoutes() {
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/vendas" element={<ProtectedRoute><VendasListPage /></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><PDVPage /></ProtectedRoute>} />
-            <Route path="/servicos" element={<ProtectedRoute><ServicosPage /></ProtectedRoute>} />
+            <Route path="/servicos" element={<ProtectedRoute><OrdensServicoListPage /></ProtectedRoute>} />
+            <Route path="/ordens-servico/:id_os" element={<ProtectedRoute><OSDetailPage /></ProtectedRoute>} />
             <Route path="/estoque" element={<ProtectedRoute><EstoquePage /></ProtectedRoute>} />
             <Route path="/movimentacoes" element={<ProtectedRoute><MovimentacoesPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />
             <Route path="/fornecedores" element={<ProtectedRoute><FornecedoresPage /></ProtectedRoute>} />
             <Route path="/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
-            <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
+            <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}>
+                <Route index element={<h2>Selecione uma categoria de configuração</h2>} />
+                <Route path="servicos/tipos" element={<TiposServicoSettingsPage />} />
+                <Route path="servicos/catalogo" element={<CatalogoServicosPage />} />
+            </Route>
             <Route path="/" element={<LoginPage />} />
         </Routes>
     );

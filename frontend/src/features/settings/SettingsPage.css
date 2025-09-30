@@ -1,0 +1,47 @@
+.settings-page {
+    display: flex;
+    height: 100%;
+}
+
+.settings-sidebar {
+    width: 240px;
+    background-color: #f8fafc; /* Um cinza bem claro */
+    padding: 20px;
+    border-right: 1px solid #e2e8f0;
+}
+
+.settings-sidebar h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+
+.settings-sidebar nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-sidebar nav a {
+    padding: 12px 16px;
+    color: #475569;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.settings-sidebar nav a:hover {
+    background-color: #e2e8f0;
+}
+
+/* Estilo que o NavLink aplica automaticamente ao link ativo */
+.settings-sidebar nav a.active {
+    background-color: #4f46e5; /* Roxo/Azul */
+    color: white;
+}
+
+.settings-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto; /* Adiciona scroll se o conteúdo for grande */
+}

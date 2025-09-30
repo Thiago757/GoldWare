@@ -1,0 +1,111 @@
+/* src/features/servicos/OSDetailPage.css */
+
+.os-detail-container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    height: 100%;
+}
+
+.os-main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.os-summary {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.card h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.servico-selector {
+    display: flex;
+    gap: 12px;
+}
+
+.servico-selector > div { /* Aumenta o seletor */
+    flex-grow: 1;
+}
+
+.summary-card .status-display,
+.summary-card .total-display {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.summary-card .status-display {
+    background-color: #f3f4f6;
+}
+
+.summary-card .status-display span {
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: block;
+}
+.summary-card .status-display strong {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.summary-card .total-display {
+    background-color: #fefce8;
+    border: 1px solid #fde047;
+}
+
+.summary-card .total-display span {
+    font-size: 0.875rem;
+    color: #ca8a04;
+    display: block;
+}
+.summary-card .total-display strong {
+    font-size: 2rem;
+    color: #a16207;
+    font-weight: 700;
+}
+
+.actions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.actions-section .action-button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.action-button.start { background-color: #3b82f6; color: white; }
+.action-button.finalize { background-color: #22c55e; color: white; }
+.action-button.cancel { background-color: #ef4444; color: white; }
+
+.status-finalizado-text {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    padding: 16px;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+}
+
