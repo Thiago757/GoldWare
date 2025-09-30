@@ -16,6 +16,8 @@ router.get('/lista-clientes', relatoriosController.gerarListaClientes);
 
 // Financeiro
 router.get('/contas-receber', relatoriosController.gerarContasReceber);
-router.get('/contas-pagar', relatoriosController.gerarContasPagar); // Rota Adicionada
+router.get('/contas-pagar', relatoriosController.gerarContasPagar);
+router.get('/fluxo-caixa', relatoriosController.gerarFluxoCaixa);
 
-module.exports = router; 
+
+module.exports = router;

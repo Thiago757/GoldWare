@@ -1,19 +1,21 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 
-// 1. Cria o Contexto
 const ReportContext = createContext();
 
-// 2. Cria o Provedor que vai gerenciar o estado
 export const ReportProvider = ({ children }) => {
-  const [isManagerOpen, setManagerOpen] = useState(false);
+  const [reportForParams, setReportForParams] = useState(null);
 
-  // Funções para controlar o assistente
-  const openReportManager = useCallback(() => setManagerOpen(true), []);
-  const closeReportManager = useCallback(() => setManagerOpen(false), []);
+  const openParamsForReport = useCallback((report) => {
+      setReportForParams(report);
+  }, []);
+
+  const closeReportManager = useCallback(() => {
+    setReportForParams(null);
+  }, []);
 
   const value = {
-    isManagerOpen,
-    openReportManager,
+    reportForParams,
+    openParamsForReport,
     closeReportManager,
   };
 
@@ -24,7 +26,6 @@ export const ReportProvider = ({ children }) => {
   );
 };
 
-// 3. Cria um Hook customizado para facilitar o uso
 export const useReports = () => {
   const context = useContext(ReportContext);
   if (!context) {

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useReports } from '../../context/ReportProvider'; // Usamos para abrir o modal de parâmetros
-import { Search, Star, File, ChevronsLeft, ChevronsRight } from 'lucide-react';
-
-const API_BASE_URL = 'http://localhost:3001';
+import { useReports } from '../../context/ReportProvider';
+import { Search, Star, File } from 'lucide-react';
 
 const relatoriosConfig = [
     { id: 'vendas_periodo', titulo: 'Vendas por Período', endpoint: '/api/relatorios/vendas-periodo', formatos: ['pdf', 'excel'], tags: ['Vendas', 'Financeiro'], parametros: [{ name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }, { name: 'vendedorId', label: 'Vendedor (Opcional)', type: 'text', placeholder: 'Nome ou ID do vendedor' }] },
@@ -17,14 +15,11 @@ const relatoriosConfig = [
 
 
 export default function RelatoriosPage() {
+    const { openParamsForReport } = useReports();
     const [searchTerm, setSearchTerm] = useState('');
     const [favorites, setFavorites] = useState(() => JSON.parse(localStorage.getItem('reportFavorites')) || []);
     const [activeTab, setActiveTab] = useState('Relatórios');
     const [activeTag, setActiveTag] = useState(null);
-    
-    // NOTA: O modal de parâmetros ainda será gerido pelo ReportManager global para manter a consistência.
-    // Esta página apenas precisa de se parecer com a lista. No futuro, poderíamos refatorar
-    // para que a lógica da lista vivesse num componente partilhado.
     
     useEffect(() => {
         localStorage.setItem('reportFavorites', JSON.stringify(favorites));
@@ -36,12 +31,8 @@ export default function RelatoriosPage() {
         setFavorites(newFavorites);
     };
     
-    const handleExecuteReport = (report) => {
-        // No futuro, poderíamos abrir o modal de parâmetros a partir daqui.
-        // Por agora, vamos manter a simplicidade e apenas simular a ação.
-        alert(`Abrindo parâmetros para: ${report.titulo}`);
-        // A lógica real de abrir o modal de parâmetros continuará no ReportManager.
-        // Clicar aqui poderia chamar uma função do useReports.
+    const handleReportClick = (report) => {
+        openParamsForReport(report);
     };
 
     const reportsToShow = relatoriosConfig
@@ -68,7 +59,7 @@ export default function RelatoriosPage() {
 
             <ul className="overflow-y-auto flex-grow">
                 {reportsToShow.map(report => (
-                    <li key={report.id} onClick={() => handleExecuteReport(report)} className="flex items-center p-3 border-b border-gray-100 hover:bg-blue-50 cursor-pointer group">
+                    <li key={report.id} onClick={() => handleReportClick(report)} className="flex items-center p-3 border-b border-gray-100 hover:bg-blue-50 cursor-pointer group">
                         <button onClick={(e) => handleToggleFavorite(report.id, e)} className="p-2 text-gray-400 hover:text-yellow-500"><Star size={18} className={`transition-colors ${favorites.includes(report.id) ? 'text-yellow-400 fill-current' : ''}`} /></button>
                         <File size={18} className="text-gray-400 mx-2" />
                         <div className="flex items-center gap-2"><p className="font-medium text-blue-700 group-hover:underline">{report.titulo}</p>{report.tags.map(tag => (<span key={tag} className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{tag}</span>))}</div>
@@ -77,4 +68,4 @@ export default function RelatoriosPage() {
             </ul>
         </div>
     );
-} 
+}
