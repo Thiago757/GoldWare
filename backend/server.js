@@ -11,10 +11,12 @@ const authRoutes = require('./src/api/auth');
 const produtoRoutes = require('./src/api/produtos'); 
 const dashboardRoutes = require('./src/api/dashboard');
 const vendaRoutes = require('./src/api/vendas');
+const ServicoRoutes = require('./src/api/tiposServicos');
+const servicos = require('./src/api/servicos');
 const clienteRoutes = require('./src/api/clientes');
-// AQUI ESTÁ A CORREÇÃO: o caminho agora é './src/api/relatorios'
 const relatoriosRoutes = require('./src/api/relatorios'); 
 
+const ordensServicos = require('./src/api/ordensServicos');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -31,6 +33,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vendas', vendaRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use('/api/relatorios', relatoriosRoutes); 
+app.use('/api/tipos-servico', ServicoRoutes);
+app.use('/api/servicos', servicos);
+app.use('/api/ordens-servico', ordensServicos);
 
 
 // Verificação da conexão com o banco de dados
