@@ -15,6 +15,7 @@ import FornecedoresPage from '../features/fornecedores/FornecedoresPage';
 import PerfilPage from '../features/perfil/PerfilPage';
 import ConfiguracoesPage from '../features/configuracoes/ConfiguracoesPage';
 import RelatoriosPage from '../features/relatorios/RelatoriosPage';
+import ServicosPage from '../features/servicos/ServicosPage';
 
 
 function AppRoutes() {
@@ -26,6 +27,7 @@ function AppRoutes() {
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/vendas" element={<ProtectedRoute><VendasListPage /></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><PDVPage /></ProtectedRoute>} />
+            <Route path="/servicos" element={<ProtectedRoute><ServicosPage /></ProtectedRoute>} />
             <Route path="/estoque" element={<ProtectedRoute><EstoquePage /></ProtectedRoute>} />
             <Route path="/movimentacoes" element={<ProtectedRoute><MovimentacoesPage /></ProtectedRoute>} />
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />

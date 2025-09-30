@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { RxDashboard } from 'react-icons/rx';
 import { CiShoppingTag, CiDeliveryTruck, CiUser, CiMoneyBill, CiSettings, CiLogout } from 'react-icons/ci';
-import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical } from 'react-icons/bs';
+import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical, BsTools  } from 'react-icons/bs';
 import { IoDocumentTextOutline } from 'react-icons/io5';
 
 const getInitials = (name = '') => {
@@ -88,6 +88,9 @@ function Sidebar() {
                         </li>
                         <li className={location.pathname === '/vendas' ? 'active' : ''}>
                             <Link to="/vendas"><CiShoppingTag /> Vendas</Link>
+                        </li>
+                        <li className={location.pathname === '/servicos' ? 'active' : ''}>
+                            <Link to="/servicos"><BsTools/> Serviços</Link>
                         </li>
                         <li className={location.pathname === '/estoque' ? 'active' : ''}>
                             <Link to="/estoque"><BsBoxSeam /> Estoque</Link>
