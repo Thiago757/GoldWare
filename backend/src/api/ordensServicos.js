@@ -10,6 +10,9 @@ router.post('/:id_os/itens', authMiddleware.verifyToken, ordensServicoController
 router.put('/:id_os/itens/:id_item_os', authMiddleware.verifyToken, ordensServicoController.atualizarItemOS);
 router.delete('/:id_os/itens/:id_item_os', authMiddleware.verifyToken, ordensServicoController.removerItemOS);
 router.put('/:id_os/status', authMiddleware.verifyToken, ordensServicoController.atualizarStatusOS);
+router.put('/:id_os/finalizar', authMiddleware.verifyToken, ordensServicoController.finalizarOS);
+router.put('/:id_os/observacao', authMiddleware.verifyToken, ordensServicoController.atualizarObservacaoOS);
+
 
 
 module.exports = router;

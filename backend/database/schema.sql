@@ -141,9 +141,9 @@ CREATE TABLE movimentacoes_estoque (
 
 CREATE TABLE contas_a_receber (
     id_conta_receber SERIAL PRIMARY KEY,
-    id_venda INT NOT NULL REFERENCES vendas(id_venda),
-    id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
+    id_venda INT REFERENCES vendas(id_venda),
     id_os INT REFERENCES ordens_servico(id_os),
+    id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
     numero_parcela INT NOT NULL,
     total_parcelas INT NOT NULL,
     valor_parcela NUMERIC(10, 2) NOT NULL,
@@ -212,6 +212,7 @@ CREATE TABLE itens_os (
     id_os INT NOT NULL REFERENCES ordens_servico(id_os) ON DELETE CASCADE,
     id_servico INT NOT NULL REFERENCES servicos(id_servico),
     quantidade INT NOT NULL DEFAULT 1 CHECK (quantidade > 0),
+    prazo_estimado INT NOT NULL,
     preco_unitario NUMERIC(10,2) NOT NULL,
     desconto NUMERIC(10,2) DEFAULT 0,
     subtotal NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario - desconto) STORED

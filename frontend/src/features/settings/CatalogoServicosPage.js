@@ -1,19 +1,16 @@
-// src/pages/settings/CatalogoServicosPage.js
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { FaEdit } from 'react-icons/fa';
-import ServicoModal from './components/ServicoModal'; // Importando o modal que criamos
+import ServicoModal from './components/ServicoModal'; 
 
 function CatalogoServicosPage() {
     const [servicos, setServicos] = useState([]);
-    const [tiposDeServico, setTiposDeServico] = useState([]); // NOVO: Estado para os tipos
+    const [tiposDeServico, setTiposDeServico] = useState([]); 
     const [loading, setLoading] = useState(true);
     const { token } = useContext(AuthContext);
     const [isModalOpen, setModalOpen] = useState(false);
     const [servicoEmEdicao, setServicoEmEdicao] = useState(null);
 
-    // ATUALIZADO: Busca serviços e tipos de serviço ao mesmo tempo
     const fetchData = async () => {
         if (!token) return;
         setLoading(true);
@@ -50,7 +47,6 @@ function CatalogoServicosPage() {
         setServicoEmEdicao(null);
     };
 
-    // NOVO: Lógica completa para salvar
     const handleSalvar = async (formData) => {
         const isEditing = !!formData.id_servico;
         const url = isEditing
