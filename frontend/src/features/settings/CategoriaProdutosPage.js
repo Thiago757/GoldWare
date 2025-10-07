@@ -1,38 +1,39 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext'; 
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
-import TipoServicoModal from './components/TipoServicoModal';
+import CategoriaProdutoModal from './components/CategoriaProdutoModal';
+import './SettingsPage.css'; 
 
-function TiposServicoSettingsPage() {
-    const [tipos, setTipos] = useState([]);
+function CategoriaProdutosPage() {
+    const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const { token } = useContext(AuthContext);
 
     const [isModalOpen, setModalOpen] = useState(false);
     const [emEdicao, setEmEdicao] = useState(null);
 
-    const fetchTipos = async () => {
+    const fetchCategorias = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:3001/api/tipos-servico', {
+            const res = await fetch('http://localhost:3001/api/categorias', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!res.ok) throw new Error('Falha ao buscar dados');
+            if (!res.ok) throw new Error('Falha ao buscar dados das categorias');
             const data = await res.json();
-            setTipos(data);
+            setCategorias(data);
         } catch (error) {
-            console.error("Erro ao buscar tipos de serviço", error);
+            console.error("Erro ao buscar categorias de produto", error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (token) fetchTipos();
+        if (token) fetchCategorias();
     }, [token]);
     
-    const handleAbrirModal = (tipo = null) => {
-        setEmEdicao(tipo);
+    const handleAbrirModal = (categoria = null) => {
+        setEmEdicao(categoria);
         setModalOpen(true);
     };
 
@@ -41,42 +42,48 @@ function TiposServicoSettingsPage() {
         setEmEdicao(null);
     };
 
-    const handleSalvar = async (tipoData) => {
-        const isEditing = !!tipoData.id_tipo_servico;
+    const handleSalvar = async (categoriaData) => {
+        const isEditing = !!categoriaData.id_categoria;
         const url = isEditing
-            ? `http://localhost:3001/api/tipos-servico/${tipoData.id_tipo_servico}`
-            : 'http://localhost:3001/api/tipos-servico';
+            ? `http://localhost:3001/api/categorias/${categoriaData.id_categoria}`
+            : 'http://localhost:3001/api/categorias';
         const method = isEditing ? 'PUT' : 'POST';
 
         try {
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nome: tipoData.nome })
+                body: JSON.stringify({ nome: categoriaData.nome })
             });
-            if (!response.ok) throw new Error('Falha ao salvar.');
+            if (!response.ok) throw new Error('Falha ao salvar a categoria.');
             
             handleFecharModal();
-            fetchTipos();
+            fetchCategorias(); 
         } catch (error) {
             console.error("Erro ao salvar:", error);
-            alert("Não foi possível salvar o tipo de serviço.");
+            alert("Não foi possível salvar a categoria.");
         }
     };
 
     const handleDeletar = async (id) => {
-        if (!window.confirm("Tem certeza que deseja excluir este tipo de serviço?")) return;
+        if (!window.confirm("Tem certeza que deseja excluir esta categoria?")) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/tipos-servico/${id}`, {
+            const response = await fetch(`http://localhost:3001/api/categorias/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await response.json().catch(() => ({}));
-
-            if (!response.ok) throw new Error(data.message || 'Falha ao excluir.');
+             
+            if (response.status === 204) { 
+                fetchCategorias(); 
+                return;
+            }
             
-            fetchTipos();
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Falha ao excluir.');
+            }
+            fetchCategorias();
         } catch (error) {
             console.error("Erro ao deletar:", error);
             alert(`Não foi possível excluir: ${error.message}`);
@@ -86,11 +93,11 @@ function TiposServicoSettingsPage() {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1>Gerenciar Tipos de Serviço</h1>
-                <button onClick={() => handleAbrirModal()} className="add-produto-btn">+ Novo Tipo</button>
+                <h1>Gerenciar Categorias de Produtos</h1>
+                <button onClick={() => handleAbrirModal()} className="add-produto-btn">+ Nova Categoria</button>
             </div>
             <p style={{ margin: '8px 0 24px', color: '#64748b' }}>
-                Cadastre as categorias para organizar os serviços que sua loja oferece.
+                Cadastre as categorias para organizar seu catálogo de produtos.
             </p>
 
             <div className="vendas-table-container">
@@ -104,12 +111,12 @@ function TiposServicoSettingsPage() {
                     <tbody>
                         {loading ? (
                             <tr><td colSpan="2">Carregando...</td></tr>
-                        ) : tipos.map(tipo => (
-                            <tr key={tipo.id_tipo_servico}>
-                                <td>{tipo.nome}</td>
+                        ) : categorias.map(cat => (
+                            <tr key={cat.id_categoria}>
+                                <td>{cat.nome}</td>
                                 <td style={{ textAlign: 'right' }}>
-                                    <button onClick={() => handleAbrirModal(tipo)} title="Editar" className="action-icon-btn"><FaEdit /></button>
-                                    <button onClick={() => handleDeletar(tipo.id_tipo_servico)} title="Excluir" className="action-icon-btn cancel-action"><FaTrashAlt /></button>
+                                    <button onClick={() => handleAbrirModal(cat)} title="Editar" className="action-icon-btn"><FaEdit /></button>
+                                    <button onClick={() => handleDeletar(cat.id_categoria)} title="Excluir" className="action-icon-btn cancel-action"><FaTrashAlt /></button>
                                 </td>
                             </tr>
                         ))}
@@ -117,14 +124,14 @@ function TiposServicoSettingsPage() {
                 </table>
             </div>
             
-            <TipoServicoModal
+            <CategoriaProdutoModal
                 isOpen={isModalOpen}
                 onClose={handleFecharModal}
                 onSave={handleSalvar}
-                tipoEmEdicao={emEdicao}
+                categoriaEmEdicao={emEdicao}
             />
         </div>
     );
 }
 
-export default TiposServicoSettingsPage;
+export default CategoriaProdutosPage;

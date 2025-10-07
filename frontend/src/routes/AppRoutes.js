@@ -18,6 +18,7 @@ import TiposServicoSettingsPage from '../features/settings/TiposServicoSettingsP
 import RelatoriosPage from '../features/relatorios/RelatoriosPage';
 import OrdensServicoListPage from '../features/servicos/OrdensServicoListPage';
 import CatalogoServicosPage from '../features/settings/CatalogoServicosPage';
+import CategoriaProdutosPage from '../features/settings/CategoriaProdutosPage';
 import OSDetailPage from '../features/servicos/OSDetailPage';
 
 function AppRoutes() {
@@ -41,6 +42,7 @@ function AppRoutes() {
                 <Route index element={<h2>Selecione uma categoria de configuração</h2>} />
                 <Route path="servicos/tipos" element={<TiposServicoSettingsPage />} />
                 <Route path="servicos/catalogo" element={<CatalogoServicosPage />} />
+                <Route path="produtos/categorias" element={<CategoriaProdutosPage />} />
             </Route>
             <Route path="/" element={<LoginPage />} />
         </Routes>

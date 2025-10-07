@@ -14,7 +14,7 @@ exports.criarTipo = async (req, res) => {
     if (!nome) return res.status(400).json({ message: 'O nome é obrigatório.' });
     try {
         const { rows } = await pool.query(
-            'INSERT INTO tipos_servico (nome) VALUES ($1) RETURNING *',
+            'INSERT INTO tipos_servico (nome, testes) VALUES ($1, $2) RETURNING *',
             [nome]
         );
         res.status(201).json(rows[0]);
