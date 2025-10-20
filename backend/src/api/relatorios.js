@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const relatoriosController = require('../controllers/relatoriosController');
 
+
 // Vendas
 router.get('/vendas-periodo', relatoriosController.gerarRelatorioVendas);
 router.get('/ranking-joias', relatoriosController.gerarRankingJoias);
