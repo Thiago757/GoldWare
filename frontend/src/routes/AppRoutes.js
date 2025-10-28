@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-
+import Sidebar from '../components/layout/Sidebar';
+import { HiMenuAlt2 } from 'react-icons/hi';
 import LoginPage from '../features/auth/LoginPage';
 import DashboardPage from '../features/dashboard/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
@@ -20,6 +21,8 @@ import OrdensServicoListPage from '../features/servicos/OrdensServicoListPage';
 import CatalogoServicosPage from '../features/settings/CatalogoServicosPage';
 import CategoriaProdutosPage from '../features/settings/CategoriaProdutosPage';
 import OSDetailPage from '../features/servicos/OSDetailPage';
+import ReceberPage from '../features/receber/ReceberPage';
+import PagarPage from '../features/pagar/PagarPage';
 
 function AppRoutes() {
     return (
@@ -37,6 +40,8 @@ function AppRoutes() {
             <Route path="/clientes" element={<ProtectedRoute><ClientesPage /></ProtectedRoute>} />
             <Route path="/fornecedores" element={<ProtectedRoute><FornecedoresPage /></ProtectedRoute>} />
             <Route path="/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
+            <Route path="/receber" element={<ProtectedRoute><ReceberPage /></ProtectedRoute>} />
+            <Route path="/pagar" element={<ProtectedRoute><PagarPage /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}>
                 <Route index element={<h2>Selecione uma categoria de configuração</h2>} />
