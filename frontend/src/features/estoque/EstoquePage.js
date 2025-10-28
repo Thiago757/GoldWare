@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback} from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
@@ -16,16 +16,22 @@ function EstoquePage() {
     const [filtroNome, setFiltroNome] = useState('');
     const [filtroCodigoBarras, setFiltroCodigoBarras] = useState('');
     const [filtroStatus, setFiltroStatus] = useState('');
+    const [scannedCode, setScannedCode] = useState('');
     const [isBarcodeModalOpen, setBarcodeModalOpen] = useState(false);
     const [produtoParaEtiqueta, setProdutoParaEtiqueta] = useState(null);
 
-    const fetchProdutos = async () => {
+    const fetchProdutos = useCallback(async (barcodeToSearch) => {
         if (!token) return;
         setLoading(true);
         try {
             const params = new URLSearchParams();
             if (filtroNome) params.append('nome', filtroNome);
-            if (filtroCodigoBarras) params.append('codigo_barras', filtroCodigoBarras);
+
+            const finalBarcode = barcodeToSearch !== undefined ? barcodeToSearch : filtroCodigoBarras;
+            if (finalBarcode) {
+                params.append('codigo_barras', finalBarcode);
+            }
+            
             if (filtroStatus) params.append('ativo', filtroStatus);
 
             const response = await fetch(`http://localhost:3001/api/produtos?${params.toString()}`, {
@@ -39,13 +45,45 @@ function EstoquePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, filtroNome, filtroCodigoBarras, filtroStatus]);
 
     useEffect(() => {
-        if (token) {
+        fetchProdutos();
+    }, [fetchProdutos]);
+
+    useEffect(() => {
+        const handleGlobalKeyDown = (e) => {
+            const targetTagName = e.target.tagName.toLowerCase();
+            if (['input', 'select', 'textarea'].includes(targetTagName)) {
+                return;
+            }
+
+            if (e.key === 'Enter') {
+                if (scannedCode) {
+                    e.preventDefault();
+                    setFiltroCodigoBarras(scannedCode); 
+                    fetchProdutos(scannedCode);       
+                    setScannedCode('');              
+                }
+            } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                setScannedCode(prevCode => prevCode + e.key);
+            }
+        };
+
+        document.addEventListener('keydown', handleGlobalKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleGlobalKeyDown);
+        };
+    }, [scannedCode, fetchProdutos]);
+
+    const handleBarcodeKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
             fetchProdutos();
+            setFiltroCodigoBarras(''); 
         }
-    }, [token]);
+    };
 
     const handleFiltroSubmit = (e) => {
         e.preventDefault();
@@ -160,6 +198,7 @@ function EstoquePage() {
                             className="filtro-input"
                             value={filtroCodigoBarras}
                             onChange={e => setFiltroCodigoBarras(e.target.value)}
+                            onKeyDown={handleBarcodeKeyDown}
                         />
                     </div>
                     <div className="filtro-item">
