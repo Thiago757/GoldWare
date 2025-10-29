@@ -8,7 +8,6 @@ CREATE TABLE cidades (
     id_cidade SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     id_estado INT REFERENCES estados(id_estado),
-    uf VARCHAR(2) NOT NULL
 );
 
 CREATE TABLE categorias (
