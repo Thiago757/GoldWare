@@ -1,5 +1,3 @@
--- ETAPA 1: TABELAS DE APOIO
-
 CREATE TABLE estados (
     id_estado SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -9,12 +7,16 @@ CREATE TABLE estados (
 CREATE TABLE cidades (
     id_cidade SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    id_estado INT REFERENCES estados(id_estado),
-    uf VARCHAR(2) NOT NULL
+    id_estado INT REFERENCES estados(id_estado)
 );
 
 CREATE TABLE categorias (
     id_categoria SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE tipos_servico (
+    id_tipo_servico SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE
 );
 
@@ -41,6 +43,7 @@ CREATE TABLE tipos_servico (
 
 -- ETAPA 2: TABELAS DE ENTIDADES (Dependem das tabelas de apoio)
 
+--  CRIAÇÃO DAS TABELAS PRINCIPAIS (ENTIDADES)
 
 CREATE TABLE usuarios (
     id_usuario SERIAL PRIMARY KEY,
@@ -63,7 +66,6 @@ CREATE TABLE clientes (
     complemento VARCHAR(100),
     bairro VARCHAR(100),
     id_cidade INT REFERENCES cidades(id_cidade),
-    id_estado INT REFERENCES estados(id_estado),
     status VARCHAR(10) NOT NULL DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo')),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -107,6 +109,8 @@ CREATE TABLE servicos (
 );
 
 -- ETAPA 3: TABELAS TRANSACIONAIS (Dependem das Entidades)
+--  CRIAÇÃO DAS TABELAS TRANSACIONAIS 
+-- (Ordem certa de execução pra obedecer dependencias)
 
 CREATE TABLE vendas (
     id_venda SERIAL PRIMARY KEY,
@@ -196,7 +200,7 @@ CREATE TABLE contas_a_receber (
 );
 
 -- ETAPA 4: TABELAS DE LIGAÇÃO (Dependem das Transacionais)
-
+--  TABELAS DE LIGAÇÃO (Muitos para Muitos) 
 
 CREATE TABLE movimentacoes_estoque (
     id_movimentacao SERIAL PRIMARY KEY,
@@ -229,7 +233,6 @@ CREATE TABLE pagamento_compra (
     observacao TEXT
 );
 
--- ETAPA 5: CRIAÇÃO DOS TRIGGERS
 
 CREATE OR REPLACE FUNCTION atualizar_saldo_recebimento()
 RETURNS TRIGGER AS $$
@@ -261,7 +264,6 @@ CREATE TRIGGER tg_after_insert_pagamento
 AFTER INSERT ON pagamento_compra
 FOR EACH ROW
 EXECUTE FUNCTION atualizar_saldo_pagamento();
-
 
 CREATE OR REPLACE FUNCTION atualizar_quantidade_estoque()
 RETURNS TRIGGER AS $$

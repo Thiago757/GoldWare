@@ -5,11 +5,14 @@ import { AuthContext } from '../../context/AuthContext';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { RxDashboard } from 'react-icons/rx';
 import { CiShoppingTag, CiDeliveryTruck, CiUser, CiSettings, CiLogout } from 'react-icons/ci';
-import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical, BsTools  } from 'react-icons/bs';
+import { BsBoxSeam, BsArrowLeftRight, BsThreeDotsVertical, BsTools } from 'react-icons/bs';
 import { IoDocumentTextOutline } from 'react-icons/io5';
+import { HiOutlineCash } from "react-icons/hi";
+import { FaRegCreditCard } from "react-icons/fa";
+import { FiMenu, FiX } from "react-icons/fi";
 
 const getInitials = (name = '') => {
-    const names = name.split(' ');
+    const names = name.trim().split(' ').filter(Boolean);
     if (names.length > 1) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
     }
@@ -17,8 +20,9 @@ const getInitials = (name = '') => {
 };
 
 function Sidebar() {
-    const { user, logout } = useContext(AuthContext); 
+    const { user, logout } = useContext(AuthContext);
     const [isMenuOpen, setMenuOpen] = useState(false);
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
     const menuRef = useRef(null);
     const location = useLocation();
@@ -30,10 +34,18 @@ function Sidebar() {
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [menuRef]);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // bloquear rolagem do body quando sidebar mobile aberta
+    useEffect(() => {
+        if (isSidebarOpen) {
+            document.body.classList.add('sidebar-open');
+        } else {
+            document.body.classList.remove('sidebar-open');
+        }
+        return () => document.body.classList.remove('sidebar-open');
+    }, [isSidebarOpen]);
 
     const handleLogoutClick = () => {
         setMenuOpen(false);
@@ -47,15 +59,26 @@ function Sidebar() {
 
     return (
         <>
-            <aside className="sidebar">
+            <button
+                className="sidebar-toggle"
+                aria-label={isSidebarOpen ? 'Fechar menu' : 'Abrir menu'}
+                onClick={() => setSidebarOpen(!isSidebarOpen)}
+            >
+                {isSidebarOpen ? <FiX /> : <FiMenu />}
+            </button>
+
+            {/* Backdrop para mobile (fecha ao clicar) */}
+            {isSidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} aria-hidden={!isSidebarOpen && window.innerWidth <= 1024}>
                 <div className="sidebar-header">
                     <h3>Gold Ware</h3>
                 </div>
-                
+
                 <div className="profile-section-wrapper" ref={menuRef}>
                     <div className="sidebar-profile">
                         <div className="profile-avatar">
-                            {user ? getInitials(user.nome) : '..'}
+                            {user ? getInitials(user.nome || '') : '..'}
                         </div>
                         <div className="profile-info">
                             <strong>{user ? user.nome : 'Carregando...'}</strong>
@@ -65,7 +88,7 @@ function Sidebar() {
                             <BsThreeDotsVertical />
                         </button>
                     </div>
-                    
+
                     {isMenuOpen && (
                         <div className="profile-dropdown-menu">
                             <ul>
@@ -81,7 +104,7 @@ function Sidebar() {
                     )}
                 </div>
 
-                <nav className="sidebar-nav">
+                <nav className="sidebar-nav" aria-label="Navegação principal">
                     <ul>
                         <li className={location.pathname === '/dashboard' ? 'active' : ''}>
                             <Link to="/dashboard"><RxDashboard /> Dashboard</Link>
@@ -104,13 +127,19 @@ function Sidebar() {
                         <li className={location.pathname === '/fornecedores' ? 'active' : ''}>
                             <Link to="/fornecedores"><CiDeliveryTruck /> Fornecedores</Link>
                         </li>
+                        <li className={location.pathname === '/receber' ? 'active' : ''}>
+                            <Link to="/receber"><HiOutlineCash /> Receber</Link>
+                        </li>
+                        <li className={location.pathname === '/pagar' ? 'active' : ''}>
+                            <Link to="/pagar"><FaRegCreditCard /> Pagar</Link>
+                        </li>
                         <li className={location.pathname === '/relatorios' ? 'active' : ''}>
                             <Link to="/relatorios"><IoDocumentTextOutline /> Relatórios</Link>
                         </li>
                     </ul>
                 </nav>
 
-                <div className="sidebar-footer"></div>
+                <div className="sidebar-footer" />
             </aside>
 
             <ConfirmationModal
@@ -123,4 +152,5 @@ function Sidebar() {
         </>
     );
 }
-export default Sidebar; 
+
+export default Sidebar;
