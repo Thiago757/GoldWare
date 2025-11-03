@@ -3,16 +3,101 @@ import { useReports } from '../../context/ReportProvider';
 import { Search, Star, File } from 'lucide-react';
 
 const relatoriosConfig = [
-    { id: 'vendas_periodo', titulo: 'Vendas por Período', endpoint: '/api/relatorios/vendas-periodo', formatos: ['pdf', 'excel'], tags: ['Vendas', 'Financeiro'], parametros: [{ name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }, { name: 'vendedorId', label: 'Vendedor (Opcional)', type: 'text', placeholder: 'Nome ou ID do vendedor' }] },
-    { id: 'ranking_joias_vendidas', titulo: 'Ranking de Joias Mais Vendidas', endpoint: '/api/relatorios/ranking-joias', formatos: ['pdf', 'excel'], tags: ['Vendas', 'Estoque'], parametros: [{ name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }] },
-    { id: 'comissoes_vendedores', titulo: 'Comissões de Vendedores', endpoint: '/api/relatorios/comissoes', formatos: ['excel'], tags: ['Vendas', 'Financeiro'], parametros: [{ name: 'mes', label: 'Mês de Referência', type: 'month', required: true }] },
-    { id: 'inventario_valorizado', titulo: 'Inventário Atual (Valorizado)', endpoint: '/api/relatorios/inventario', formatos: ['excel'], tags: ['Estoque', 'Financeiro'], parametros: [{ name: 'material', label: 'Material Principal', type: 'select', options: ['Todos', 'Ouro 18k', 'Prata 925', 'Outros'] }, { name: 'fornecedor', label: 'Fornecedor (Opcional)', type: 'text' }] },
-    { id: 'estoque_baixo', titulo: 'Relatório de Estoque Baixo', endpoint: '/api/relatorios/estoque-baixo', formatos: ['excel'], tags: ['Estoque', 'Compras'], parametros: [{ name: 'limite', label: 'Quantidade máxima em estoque', type: 'number', defaultValue: 5, required: true }] },
-    { id: 'contas_receber', titulo: 'Contas a Receber (Clientes)', endpoint: '/api/relatorios/contas-receber', formatos: ['pdf', 'excel'], tags: ['Financeiro', 'Clientes'], parametros: [{ name: 'status', label: 'Status', type: 'select', options: ['Todas', 'Em Aberto', 'Vencidas'] }] },
-    { id: 'contas_pagar', titulo: 'Contas a Pagar (Fornecedores)', endpoint: '/api/relatorios/contas-pagar', formatos: ['pdf', 'excel'], tags: ['Financeiro', 'Compras'], parametros: [{ name: 'status', label: 'Status', type: 'select', options: ['Todas', 'A Pagar', 'Vencidas', 'Pagas'] }, { name: 'fornecedor', label: 'Fornecedor (Opcional)', type: 'text' }] },
-    { id: 'fluxo_caixa', titulo: 'Relatório de Fluxo de Caixa', endpoint: '/api/relatorios/fluxo-caixa', formatos: ['excel'], tags: ['Financeiro'], parametros: [{ name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }] }
+  { 
+    id: 'vendas_periodo', 
+    titulo: 'Vendas por Período', 
+    endpoint: '/api/relatorios/vendas-periodo', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Vendas', 'Financeiro'], 
+    parametros: [
+      { name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, 
+      { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }
+    ] 
+  },
+  { 
+    id: 'ranking_joias_vendidas', 
+    titulo: 'Ranking de Joias Mais Vendidas', 
+    endpoint: '/api/relatorios/ranking-joias', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Vendas', 'Estoque'], 
+    parametros: [
+      { name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true },
+      { name: 'dataFinal', label: 'Data Final', type: 'date', required: true },
+      { name: 'id_categoria', label: 'Categoria (Opcional)', type: 'select_categorias', placeholder: 'Todas as categorias' }
+    ] 
+  },
+  { 
+    id: 'comissoes_vendedores', 
+    titulo: 'Comissões de Vendedores', 
+    endpoint: '/api/relatorios/comissoes', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Vendas', 'Financeiro'], 
+    parametros: [
+    { name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true },
+    { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }
+    ]
+  },
+  { 
+    id: 'inventario_valorizado', 
+    titulo: 'Inventário Atual (Valorizado)', 
+    endpoint: '/api/relatorios/inventario', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Estoque', 'Financeiro'], 
+    parametros: [
+      { name: 'id_categoria', label: 'Categoria (Opcional)', type: 'select_categorias', placeholder: 'Todas as categorias' }
+    ] 
+  },
+  { 
+    id: 'estoque_baixo', 
+    titulo: 'Relatório de Estoque Baixo', 
+    endpoint: '/api/relatorios/estoque-baixo', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Estoque', 'Compras'], 
+    parametros: [
+      { name: 'limite', label: 'Quantidade máxima em estoque', type: 'number', defaultValue: 5, required: true }
+    ] 
+  },
+  { 
+    id: 'contas_receber', 
+    titulo: 'Contas a Receber (Clientes)', 
+    endpoint: '/api/relatorios/contas-receber', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Financeiro', 'Clientes'], 
+    parametros: [
+      { name: 'status', label: 'Status', type: 'select', options: ['Todas', 'Em Aberto', 'Vencidas'], required: true }
+    ] 
+  },
+  { 
+    id: 'contas_pagar', 
+    titulo: 'Contas a Pagar (Fornecedores)', 
+    endpoint: '/api/relatorios/contas-pagar', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Financeiro', 'Compras'], 
+    parametros: [
+      { name: 'status', label: 'Status', type: 'select', options: ['Todas', 'A Pagar', 'Vencidas', 'Pagas'], required: true}, 
+      { name: 'fornecedor', label: 'Fornecedor (Opcional)', type: 'text' }
+    ] 
+  },
+  { 
+    id: 'fluxo_caixa', 
+    titulo: 'Relatório de Fluxo de Caixa', 
+    endpoint: '/api/relatorios/fluxo-caixa', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Financeiro'], 
+    parametros: [
+      { name: 'dataInicial', label: 'Data Inicial', type: 'date', required: true }, 
+      { name: 'dataFinal', label: 'Data Final', type: 'date', required: true }
+    ] 
+  },
+  { 
+    id: 'lista_clientes_historico', 
+    titulo: 'Lista de Clientes Cadastrados', 
+    endpoint: '/api/relatorios/lista-clientes', 
+    formatos: ['pdf', 'excel'], 
+    tags: ['Clientes', 'CRM'], 
+    parametros: [] 
+  },
 ];
-
 
 export default function RelatoriosPage() {
     const { openParamsForReport } = useReports();
@@ -32,7 +117,9 @@ export default function RelatoriosPage() {
     };
     
     const handleReportClick = (report) => {
-        openParamsForReport(report);
+        // Encontra o relatório mais atualizado no config (caso o config mude)
+        const reportConfig = relatoriosConfig.find(r => r.id === report.id);
+        openParamsForReport(reportConfig || report);
     };
 
     const reportsToShow = relatoriosConfig

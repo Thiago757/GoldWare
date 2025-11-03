@@ -1,0 +1,111 @@
+/* --- ESTILOS PARA O MODAL DE GESTÃO DE CATEGORIAS --- */
+
+.categoria-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categoria-modal .modal-close-button {
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+}
+
+.categoria-modal .modal-close-button:hover {
+    color: #111827;
+}
+
+.categoria-modal .modal-body {
+    padding-top: 15px;
+    padding-bottom: 20px;
+}
+
+.categoria-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.categoria-form input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* --- CORREÇÃO DEFINITIVA COM !important --- */
+/* Esta regra agora força a cor verde do seu .add-produto-btn */
+.categoria-form .save-categoria {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    
+    /* Usando a cor verde do seu botão e !important para forçar */
+    background-color: #16a34a !important; 
+    color: white !important;
+    border: none !important; /* Garante que não tem bordas azuis/cinza */
+}
+
+/* Hover também com !important */
+.categoria-form .save-categoria:hover {
+    background-color: #15803d !important; /* Um verde um pouco mais escuro */
+}
+
+.categoria-list {
+    list-style: none;
+    padding: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.categoria-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.categoria-list-item:last-child {
+    border-bottom: none;
+}
+
+.categoria-list-item span {
+    font-weight: 500;
+    color: #333;
+}
+
+.categoria-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.categoria-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.categoria-actions button:hover {
+    color: #000;
+    background-color: #f1f5f9;
+}
+
+.categoria-actions button[title="Apagar"]:hover {
+    color: #e53e3e;
+}

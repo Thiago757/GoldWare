@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
 import BarcodeModal from './components/BarcodeModal';
+import GerenciarCategoriasModal from '../../components/common/GerenciarCategoriasModal';
 import { FaBarcode } from 'react-icons/fa';
 import './EstoquePage.css';
 import '../vendas/VendasListPage.css'; 
@@ -18,6 +19,8 @@ function EstoquePage() {
     const [filtroStatus, setFiltroStatus] = useState('');
     const [isBarcodeModalOpen, setBarcodeModalOpen] = useState(false);
     const [produtoParaEtiqueta, setProdutoParaEtiqueta] = useState(null);
+    const [isCategoriasModalOpen, setCategoriasModalOpen] = useState(false);
+    const [refreshProdutos, setRefreshProdutos] = useState(false);
 
     const fetchProdutos = async () => {
         if (!token) return;
@@ -45,7 +48,7 @@ function EstoquePage() {
         if (token) {
             fetchProdutos();
         }
-    }, [token]);
+    }, [token, refreshProdutos]);
 
     const handleFiltroSubmit = (e) => {
         e.preventDefault();
@@ -127,9 +130,14 @@ function EstoquePage() {
         }
     };
 
-     const handleAbreModalEtiqueta = (produto) => {
+    const handleAbreModalEtiqueta = (produto) => {
         setProdutoParaEtiqueta(produto);
         setBarcodeModalOpen(true);
+    };
+
+    const handleCategoriasClose = () => {
+        setCategoriasModalOpen(false);
+        setRefreshProdutos(prev => !prev);
     };
 
     if (loading && produtos.length === 0) return <p>Carregando produtos...</p>;
@@ -139,7 +147,16 @@ function EstoquePage() {
             <div className="estoque-container">
                 <div className="estoque-header">
                     <h1>Gerenciamento de Estoque</h1>
-                    <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
+                    <div className="header-botoes-estoque">
+                         <button 
+                            onClick={() => setCategoriasModalOpen(true)} 
+                            className="add-produto-btn" 
+                            style={{backgroundColor: '#6b7280', marginRight: '10px'}}
+                        >
+                            Gerir Categorias
+                        </  button>
+                        <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
+                    </div>
                 </div>
                 <form onSubmit={handleFiltroSubmit} className="filtros-container">
                     <div className="filtro-item" style={{flexGrow: 1}}>
@@ -206,6 +223,10 @@ function EstoquePage() {
                 isOpen={isBarcodeModalOpen}
                 onClose={() => setBarcodeModalOpen(false)}
                 produto={produtoParaEtiqueta}
+            />
+            <GerenciarCategoriasModal
+                isOpen={isCategoriasModalOpen}
+                onClose={handleCategoriasClose}
             />
         </>
     );

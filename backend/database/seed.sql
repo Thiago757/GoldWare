@@ -51,13 +51,16 @@ INSERT INTO produtos (nome, descricao, preco_venda, custo, quantidade_estoque, i
 
 -- Etapa 3: População dos Dados Transacionais (Movimentações)
 
--- CORRIGIDO: Inserindo SEM id_usuario e com DATAS NO ANO ATUAL (2025)
-INSERT INTO vendas (id_cliente, data_venda, valor_total, status) VALUES
-(1, '2025-10-01 10:30:00', 1500.00, 'concluida'),
-(2, '2025-10-05 11:45:00', 600.00, 'concluida'),
-(3, '2025-10-06 14:10:00', 2800.00, 'cancelada'),
-(1, '2025-11-01 16:00:00', 950.00, 'concluida'); -- Mês atual
+-- (INSERTs de estados, cidades, categorias, usuarios, clientes, produtos, etc...)
 
+-- INSERTS DE VENDAS (COM O ID_USUARIO)
+INSERT INTO vendas (id_venda, id_cliente, id_usuario, data_venda, valor_total, status) VALUES
+(1, 1, 2, '2025-10-01 10:30:00', 1500.00, 'concluida'), -- Venda do João (ID 2)
+(2, 2, 2, '2025-10-05 11:45:00', 600.00, 'concluida'), -- Venda do João (ID 2)
+(3, 3, 1, '2025-10-06 14:10:00', 2800.00, 'cancelada'),-- Venda do Alexandre (ID 1)
+(4, 1, 2, '2025-11-01 16:00:00', 950.00, 'concluida'); -- Venda do João (ID 2) no mês atual
+
+-- (Resto dos INSERTs...)
 INSERT INTO itens_venda (id_venda, id_produto, quantidade, preco_unitario) VALUES
 (1, 1, 1, 1500.00), (2, 2, 2, 250.00), (2, 4, 1, 100.00), (3, 5, 1, 2800.00), (4, 6, 1, 950.00); 
 
