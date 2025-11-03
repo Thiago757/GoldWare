@@ -1,25 +1,69 @@
-.estoque-container { padding: 10px; }
-.estoque-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.estoque-header h1 { font-size: 1.8rem; color: #1e293b; }
-.add-produto-btn { background-color: #16a34a; color: white; border: none; padding: 12px 22px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-.produtos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+.estoque-container {
+    padding: 20px;
 }
 
-.filtros-container-estoque {
+.estoque-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.estoque-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+}
+
+/* O estilo do botão que você quer */
+.add-produto-btn {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.add-produto-btn:hover {
+    background-color: #15803d;
+}
+
+.header-botoes-estoque {
+    display: flex;
+    gap: 10px;
+}
+
+
+/* --- CORREÇÃO DOS NOMES DAS CLASSES DOS FILTROS --- */
+
+/* Era .filtros-container-estoque */
+.filtros-container {
     display: flex;
     gap: 15px;
     margin-bottom: 20px;
     padding: 20px;
     background-color: #f8fafc;
     border-radius: 8px;
-    align-items: center;
+    align-items: flex-end; /* Alinha os itens na base */
     justify-content: flex-start;
 }
 
-.filtro-input-estoque {
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filtro-item label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+/* Era .filtro-input-estoque */
+.filtro-input {
     padding: 10px 15px;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
@@ -27,20 +71,8 @@
     height: 42px;
 }
 
-.filtro-input-estoque.nome {
-    width: 100%;
-    max-width: 400px;
-}
-
-.filtro-input-estoque.status {
-    width: 150px;
-}
-
-.filtro-input-estoque[type="text"] {
-    flex-grow: 1; 
-}
-
-.filtrar-btn-estoque {
+/* Era .filtrar-btn-estoque */
+.filtrar-btn {
     background-color: #334155;
     color: white;
     border: none;
@@ -49,4 +81,105 @@
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+.filtrar-btn:hover {
+    background-color: #1e293b;
+}
+
+
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.produto-modal .form-group input[type="text"],
+.produto-modal .form-group input[type="number"],
+.produto-modal .form-group input[type="month"],
+.produto-modal .form-group input[type="date"], /* Adicionado por precaução */
+.produto-modal .form-group textarea,
+.produto-modal .form-group select,
+.produto-modal .custom-file-upload {
+    /* Estilos copiados do seu .filtro-input */
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 1rem;
+    height: 42px;
+    
+    /* Garante consistência */
+    width: 100%;
+    box-sizing: border-box; 
+    margin: 0;
+    background-color: #fff;
+    color: #111827;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* SEPARAMOS OS CAMPOS QUE PODEMOS MUDAR A APARÊNCIA
+   (Texto, Número, Select)
+*/
+.produto-modal .form-group input[type="text"],
+.produto-modal .form-group input[type="number"],
+.produto-modal .form-group textarea,
+.produto-modal .form-group select {
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* SEPARAMOS OS CAMPOS QUE O NAVEGADOR NÃO DEIXA MUDAR
+   (Mês e Data). Deixamos a aparência nativa,
+   mas garantimos que o alinhamento do texto fica bom.
+*/
+.produto-modal .form-group input[type="month"],
+.produto-modal .form-group input[type="date"] {
+    padding-top: 8px; /* Ajuste fino para alinhar o texto verticalmente */
+    padding-bottom: 8px;
+}
+
+/* Adiciona a setinha personalizada ao select */
+.produto-modal .form-group select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236B7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22M6%208l4%204%204-4%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem; 
+}
+
+/* Ajuste para textarea (para não ficar com 42px) */
+.produto-modal .form-group textarea {
+    height: auto;
+    min-height: 84px;
+    padding-top: 10px;
+    resize: vertical;
+}
+
+/* CORREÇÃO PARA O UPLOAD DE IMAGEM */
+.produto-modal .custom-file-upload {
+    display: flex; /* Faz o ícone e o texto ficarem lado a lado */
+    align-items: center; /* Centra-os verticalmente */
+    gap: 10px; /* Espaço entre o ícone e o texto */
+    cursor: pointer;
+    background-color: #f9fafb; /* Fundo ligeiramente diferente */
+}
+
+.produto-modal .custom-file-upload:hover {
+    background-color: #f3f4f6;
+}
+
+/* Estilo de foco para todos */
+.produto-modal .form-group input:focus,
+.produto-modal .form-group textarea:focus,
+.produto-modal .form-group select:focus,
+.produto-modal .custom-file-upload:focus-within { /* :focus-within é para o label */
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px #c7d2fe; 
+}
+
+.produto-modal .custom-file-upload span {
+    color: #4b5563;
+    font-weight: 500;
 }

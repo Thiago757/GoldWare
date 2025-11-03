@@ -1,5 +1,3 @@
--- CRIAÇÃO DAS TABELAS DE APOIO  
-
 CREATE TABLE estados (
     id_estado SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -37,6 +35,13 @@ CREATE TABLE contas_bancarias (
     saldo NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
     ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N'))
 );
+
+CREATE TABLE tipos_servico (
+    id_tipo_servico SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- ETAPA 2: TABELAS DE ENTIDADES (Dependem das tabelas de apoio)
 
 --  CRIAÇÃO DAS TABELAS PRINCIPAIS (ENTIDADES)
 
@@ -98,18 +103,19 @@ CREATE TABLE servicos (
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     preco_base NUMERIC(10,2) NOT NULL,
-    prazo_estimado INT, -- em dias
+    prazo_estimado INT,
     ativo CHAR(1) NOT NULL DEFAULT 'S' CHECK (ativo IN ('S','N')),
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ETAPA 3: TABELAS TRANSACIONAIS (Dependem das Entidades)
 --  CRIAÇÃO DAS TABELAS TRANSACIONAIS 
 -- (Ordem certa de execução pra obedecer dependencias)
 
 CREATE TABLE vendas (
     id_venda SERIAL PRIMARY KEY,
     id_cliente INT REFERENCES clientes(id_cliente),
-    id_usuario INT REFERENCES usuarios(id_usuario), 
+    id_usuario INT REFERENCES usuarios(id_usuario),
     data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     valor_total NUMERIC(10,2),
     desconto NUMERIC(10,2) DEFAULT 0,
@@ -182,7 +188,7 @@ CREATE TABLE contas_a_pagar (
 CREATE TABLE contas_a_receber (
     id_conta_receber SERIAL PRIMARY KEY,
     id_venda INT REFERENCES vendas(id_venda),
-    id_os INT REFERENCES ordens_servico(id_os),
+    id_os INT REFERENCES ordens_servico(id_os), 
     id_cliente INT NOT NULL REFERENCES clientes(id_cliente),
     numero_parcela INT NOT NULL,
     total_parcelas INT NOT NULL,
@@ -193,6 +199,7 @@ CREATE TABLE contas_a_receber (
     status VARCHAR(20) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'parcial', 'atrasado', 'cancelado'))
 );
 
+-- ETAPA 4: TABELAS DE LIGAÇÃO (Dependem das Transacionais)
 --  TABELAS DE LIGAÇÃO (Muitos para Muitos) 
 
 CREATE TABLE movimentacoes_estoque (
@@ -226,9 +233,7 @@ CREATE TABLE pagamento_compra (
     observacao TEXT
 );
 
---  TRIGGERS
 
--- Trigger para SALDO FINANCEIRO (Entradas)
 CREATE OR REPLACE FUNCTION atualizar_saldo_recebimento()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -244,7 +249,7 @@ AFTER INSERT ON recebimento_venda
 FOR EACH ROW
 EXECUTE FUNCTION atualizar_saldo_recebimento();
 
--- Trigger para SALDO FINANCEIRO (Saídas)
+
 CREATE OR REPLACE FUNCTION atualizar_saldo_pagamento()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -260,7 +265,6 @@ AFTER INSERT ON pagamento_compra
 FOR EACH ROW
 EXECUTE FUNCTION atualizar_saldo_pagamento();
 
--- Trigger para SALDO DE ESTOQUE
 CREATE OR REPLACE FUNCTION atualizar_quantidade_estoque()
 RETURNS TRIGGER AS $$
 BEGIN

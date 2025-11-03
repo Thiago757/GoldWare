@@ -10,19 +10,44 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
     const [error, setError] = useState('');
     const { token } = useContext(AuthContext);
 
+    const [categorias, setCategorias] = useState([]);
+    const [loadingCategorias, setLoadingCategorias] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             if (produto) {
-                setFormData(produto);
+                setFormData({
+                    ...produto,
+                    id_categoria: produto.id_categoria || '' 
+                });
                 setPreviewImagem(produto.imagem_url);
             } else {
-                setFormData({ nome: '', descricao: '', preco_venda: '', custo: '', quantidade_estoque: '', categoria: '' });
+                setFormData({ nome: '', descricao: '', preco_venda: '', custo: '', quantidade_estoque: '', id_categoria: '' });
                 setPreviewImagem(null);
             }
             setError('');
             setImagemSelecionada(null);
+
+            const fetchCategoriasParaSelect = async () => {
+                if (!token) return;
+                setLoadingCategorias(true);
+                try {
+                    const response = await fetch('http://localhost:3001/api/categorias', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Falha ao carregar categorias');
+                    const data = await response.json();
+                    setCategorias(data);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoadingCategorias(false);
+                }
+            };
+
+            fetchCategoriasParaSelect();
         }
-    }, [produto, isOpen]);
+    }, [produto, isOpen, token]);
 
     if (!isOpen) return null;
 
@@ -42,7 +67,7 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const camposObrigatorios = ['nome', 'preco_venda', 'custo', 'quantidade_estoque', 'categoria'];
+        const camposObrigatorios = ['nome', 'preco_venda', 'custo', 'quantidade_estoque', 'id_categoria'];
         for (const campo of camposObrigatorios) {
             if (!formData[campo]) {
                 setError('Por favor, preencha todos os campos obrigatórios (*).');
@@ -86,8 +111,22 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                             <input type="number" name="quantidade_estoque" value={formData.quantidade_estoque || ''} onChange={handleChange} />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="categoria">Categoria*</label>
-                            <input type="text" name="categoria" value={formData.categoria || ''} onChange={handleChange} />
+                            <label htmlFor="id_categoria">Categoria*</label>
+                            <select
+                                name="id_categoria"
+                                value={formData.id_categoria || ''}
+                                onChange={handleChange}
+                                disabled={loadingCategorias}
+                            >
+                                <option value="" disabled>
+                                    {loadingCategorias ? 'A carregar...' : 'Selecione a categoria'}
+                                </option>
+                                {categorias.map(cat => (
+                                    <option key={cat.id_categoria} value={cat.id_categoria}>
+                                        {cat.nome}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         {produto && (
                             <div className="form-group form-group-span-2">
