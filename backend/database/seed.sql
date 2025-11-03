@@ -1,10 +1,9 @@
-
+-- Etapa 1: População dos Dados de Apoio (Lookup)
 INSERT INTO estados (nome, sigla) VALUES
 ('Santa Catarina', 'SC'),
 ('Rio Grande do Sul', 'RS'),
 ('Paraná', 'PR');
 
--- Inserindo com a coluna 'uf'
 INSERT INTO cidades (nome, id_estado, uf) VALUES
 ('Criciúma', 1, 'SC'),
 ('Florianópolis', 1, 'SC'),
@@ -24,7 +23,7 @@ INSERT INTO contas_bancarias (nome_conta, banco, saldo) VALUES
 ('Conta Principal (Banco A)', 'Banco A', 10000.00),
 ('Caixa da Loja', 'Caixa Interno', 500.00);
 
-
+-- Etapa 2: População dos Dados Principais (Entidades)
 INSERT INTO usuarios (nome, email, senha_hash, tipo) VALUES
 ('Alexandre', 'alexandretibes9@gmail.com', '$2b$10$/nhwI/5J1UX3jfAnBncqGugPRqhDi0dVZ2CiFFn7J8yBKSOdFKrCC', 'admin'),
 ('João Vendedor', 'joao@goldware.com', '$2b$10$fakehashparavendedor1', 'vendedor'),
@@ -50,49 +49,52 @@ INSERT INTO produtos (nome, descricao, preco_venda, custo, quantidade_estoque, i
 ('Aliança de Ouro 18k 4mm (Par)', 'Par de alianças tradicionais', 2800.00, 1500.00, 0, 6, '10005'),
 ('Relógio Masculino Aço', 'Relógio cronógrafo à prova d''água', 950.00, 450.00, 0, 5, '10006');
 
+-- Etapa 3: População dos Dados Transacionais (Movimentações)
 
-INSERT INTO vendas (id_cliente, id_usuario, data_venda, valor_total, status) VALUES
-(1, 2, '2025-10-01 10:30:00', 1500.00, 'concluida'),
-(2, 2, '2025-10-05 11:45:00', 600.00, 'concluida'),
-(3, 1, '2025-10-06 14:10:00', 2800.00, 'cancelada'),
-(1, 2, '2025-11-01 16:00:00', 950.00, 'concluida'); 
+-- CORRIGIDO: Inserindo SEM id_usuario e com DATAS NO ANO ATUAL (2025)
+INSERT INTO vendas (id_cliente, data_venda, valor_total, status) VALUES
+(1, '2025-10-01 10:30:00', 1500.00, 'concluida'),
+(2, '2025-10-05 11:45:00', 600.00, 'concluida'),
+(3, '2025-10-06 14:10:00', 2800.00, 'cancelada'),
+(1, '2025-11-01 16:00:00', 950.00, 'concluida'); -- Mês atual
 
 INSERT INTO itens_venda (id_venda, id_produto, quantidade, preco_unitario) VALUES
 (1, 1, 1, 1500.00), (2, 2, 2, 250.00), (2, 4, 1, 100.00), (3, 5, 1, 2800.00), (4, 6, 1, 950.00); 
 
-INSERT INTO compras (id_fornecedor, id_usuario_responsavel, valor_total, numero_nota_fiscal, status) VALUES
-(2, 3, 1850.00, 'NF-001', 'recebido'), (1, 3, 6200.00, 'NF-002', 'recebido');
+INSERT INTO compras (id_fornecedor, id_usuario_responsavel, valor_total, numero_nota_fiscal, status, data_compra) VALUES
+(2, 3, 1850.00, 'NF-001', 'recebido', '2025-10-15 09:00:00'),
+(1, 3, 6200.00, 'NF-002', 'recebido', '2025-10-20 09:00:00');
 
 INSERT INTO itens_compra (id_compra, id_produto, quantidade, custo_unitario) VALUES
 (1, 2, 10, 110.00), (1, 4, 10, 75.00), (2, 1, 5, 800.00), (2, 6, 5, 450.00); 
 
 INSERT INTO ordens_servico (id_cliente, id_usuario_responsavel, data_abertura, status) VALUES
-(1, 2, '2024-10-10 09:00:00', 'concluida'), (2, 2, '2024-10-11 14:00:00', 'em_andamento');
+(1, 2, '2025-10-10 09:00:00', 'concluida'), (2, 2, '2025-10-11 14:00:00', 'em_andamento');
 
 INSERT INTO itens_os (id_os, id_servico, quantidade, prazo_estimado, preco_unitario) VALUES
 (1, 2, 1, 1, 50.00), (2, 1, 1, 3, 80.00);
 
 INSERT INTO contas_a_pagar (id_compra, id_fornecedor, descricao, valor, data_vencimento, status) VALUES
-(1, 2, 'Nota Fiscal NF-001 - Pratas & Cia', 1850.00, '2024-10-20', 'pago'),
-(2, 1, 'Nota Fiscal NF-002 - Ouro Fino Ltda', 6200.00, '2024-11-15', 'pendente'),
-(NULL, 1, 'Aluguel Loja', 3500.00, '2024-11-05', 'pendente'),
-(NULL, NULL, 'Conta de Energia Elétrica', 450.00, '2024-11-08', 'pendente');
+(1, 2, 'Nota Fiscal NF-001 - Pratas & Cia', 1850.00, '2025-10-20', 'pago'),
+(2, 1, 'Nota Fiscal NF-002 - Ouro Fino Ltda', 6200.00, '2025-11-15', 'pendente'),
+(NULL, 1, 'Aluguel Loja', 3500.00, '2025-11-05', 'pendente'),
+(NULL, NULL, 'Conta de Energia Elétrica', 450.00, '2025-11-08', 'pendente');
 
 INSERT INTO contas_a_receber (id_venda, id_os, id_cliente, numero_parcela, total_parcelas, valor_parcela, data_vencimento, status) VALUES
-(1, NULL, 1, 1, 1, 1500.00, '2024-10-01', 'pago'),
-(2, NULL, 2, 1, 2, 300.00, '2024-10-05', 'pago'),
-(2, NULL, 2, 2, 2, 300.00, '2024-11-05', 'pendente'),
-(4, NULL, 1, 1, 1, 950.00, '2024-11-10', 'pendente'),
-(NULL, 1, 1, 1, 1, 50.00, '2024-10-15', 'pago');
+(1, NULL, 1, 1, 1, 1500.00, '2025-10-01', 'pago'),
+(2, NULL, 2, 1, 2, 300.00, '2025-10-05', 'pago'),
+(2, NULL, 2, 2, 2, 300.00, '2025-11-05', 'pendente'),
+(4, NULL, 1, 1, 1, 950.00, '2025-11-10', 'pendente'),
+(NULL, 1, 1, 1, 1, 50.00, '2025-10-15', 'pago');
 
-
+-- Etapa 4: Movimentações (Vão disparar os Triggers)
 INSERT INTO pagamento_compra (id_conta_pagar, id_conta_bancaria, id_forma_pagamento, valor_pago, data_pagamento) VALUES
-(1, 1, 4, 1850.00, '2024-10-20 10:00:00');
+(1, 1, 4, 1850.00, '2025-10-20 10:00:00');
 
 INSERT INTO recebimento_venda (id_conta_receber, id_conta_bancaria, id_forma_pagamento, valor_recebido, data_recebimento) VALUES
-(1, 2, 1, 1500.00, '2024-10-01 10:35:00'),
-(2, 1, 3, 300.00, '2024-10-05 11:50:00'),
-(5, 2, 1, 50.00, '2024-10-10 09:30:00');
+(1, 2, 1, 1500.00, '2025-10-01 10:35:00'),
+(2, 1, 3, 300.00, '2025-10-05 11:50:00'),
+(5, 2, 1, 50.00, '2025-10-10 09:30:00');
 
 INSERT INTO movimentacoes_estoque (id_produto, tipo_movimentacao, quantidade, id_item_compra, id_usuario_responsavel, observacao) VALUES
 (2, 'entrada', 10, 1, 3, 'Compra ID 1 / NF-001'),
