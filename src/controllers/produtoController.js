@@ -68,7 +68,7 @@ exports.findByBarcode = async (req, res) => {
 
 exports.createProduto = async (req, res) => {
     try {
-        const { nome, descricao, preco_venda, custo, quantidade_estoque, categoria } = req.body;
+        const { nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria } = req.body;
         
         let imageUrl = null;
         if (req.file) {
@@ -78,9 +78,9 @@ exports.createProduto = async (req, res) => {
         const codigo_barras = generateEAN13();
 
         const novoProduto = await pool.query(
-            `INSERT INTO produtos (nome, descricao, preco_venda, custo, quantidade_estoque, categoria, codigo_barras, imagem_url) 
+            `INSERT INTO produtos (nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imagem_url) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [nome, descricao, preco_venda, custo, quantidade_estoque, categoria, codigo_barras, imageUrl]
+            [nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imageUrl]
         );
 
         res.status(201).json(novoProduto.rows[0]);
@@ -165,14 +165,14 @@ exports.uploadImage = async (req, res) => {
 exports.updateProduto = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nome, descricao, preco_venda, custo, quantidade_estoque, categoria } = req.body;
+        const { nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria } = req.body;
 
         const produtoAtualizado = await pool.query(
             `UPDATE produtos SET 
                 nome = $1, descricao = $2, preco_venda = $3, custo = $4, 
-                quantidade_estoque = $5, categoria = $6 
+                quantidade_estoque = $5, id_categoria = $6 
              WHERE id_produto = $7 RETURNING *`,
-            [nome, descricao, preco_venda, custo, quantidade_estoque, categoria, id]
+            [nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, id]
         );
 
         if (produtoAtualizado.rowCount === 0) {
