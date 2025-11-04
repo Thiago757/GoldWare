@@ -1,11 +1,50 @@
-.estoque-container { padding: 10px; }
-.estoque-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.estoque-header h1 { font-size: 1.8rem; color: #1e293b; }
-.add-produto-btn { background-color: #16a34a; color: white; border: none; padding: 12px 22px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.estoque-container { 
+    padding: 10px; 
+}
+
+.estoque-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+}
+
+.estoque-header h1 { 
+    font-size: 1.8rem; 
+    color: #1e293b; 
+}
+
+.add-produto-btn { 
+    background-color: #16a34a; 
+    color: white; border: none; 
+    padding: 12px 22px; 
+    border-radius: 8px; 
+    font-size: 1rem; 
+    font-weight: 600; 
+    cursor: pointer; 
+}
+
 .produtos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+}
+
+.filtros-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+
+.filtro-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .filtros-container-estoque {
@@ -15,8 +54,28 @@
     padding: 20px;
     background-color: #f8fafc;
     border-radius: 8px;
-    align-items: center;
+    align-items: flex-end; 
     justify-content: flex-start;
+}
+
+.filtro-input {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 1rem;
+    height: 42px;
+}
+
+.filtro-item:nth-child(1) {
+    flex: 1.6;
+}
+
+.filtro-item:nth-child(2) {
+    flex: 1;
+}
+
+.filtro-item:nth-child(3) {
+    flex: 0.7;
 }
 
 .filtro-input-estoque {
@@ -25,20 +84,22 @@
     border: 1px solid #e2e8f0;
     font-size: 1rem;
     height: 42px;
+    flex-grow: 1;
+    flex-basis: 0
 }
 
 .filtro-input-estoque.nome {
-    width: 100%;
-    max-width: 400px;
+    flex-grow: 3;
 }
 
 .filtro-input-estoque.status {
-    width: 150px;
+    flex-grow: 1;
 }
 
-.filtro-input-estoque[type="text"] {
-    flex-grow: 1; 
+.filtro-input-estoque.codigo-barras {
+    flex-grow: 2;
 }
+
 
 .filtrar-btn-estoque {
     background-color: #334155;

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext, useCallback} from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
 import BarcodeModal from './components/BarcodeModal';
-import { FaBarcode } from 'react-icons/fa';
+import ImageModal from '../../components/common/ImagemModal';
 import './EstoquePage.css';
-import '../vendas/VendasListPage.css'; 
+import '../vendas/VendasListPage.css';
 
 function EstoquePage() {
     const [produtos, setProdutos] = useState([]);
@@ -19,6 +19,9 @@ function EstoquePage() {
     const [scannedCode, setScannedCode] = useState('');
     const [isBarcodeModalOpen, setBarcodeModalOpen] = useState(false);
     const [produtoParaEtiqueta, setProdutoParaEtiqueta] = useState(null);
+    const [categorias, setCategorias] = useState([]);
+    const [isImageModalOpen, setImageModalOpen] = useState(false);
+    const [currentImageForView, setCurrentImageForView] = useState('');
 
     const fetchProdutos = useCallback(async (barcodeToSearch) => {
         if (!token) return;
@@ -47,9 +50,24 @@ function EstoquePage() {
         }
     }, [token, filtroNome, filtroCodigoBarras, filtroStatus]);
 
+    const fetchCategorias = useCallback(async () => {
+        if (!token) return;
+        try {
+            const response = await fetch(`http://localhost:3001/api/categorias`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Falha ao buscar categorias');
+            const data = await response.json();
+            setCategorias(data);
+        } catch (error) {
+            console.error("Erro ao buscar categorias:", error);
+        }
+    }, [token]);
+
     useEffect(() => {
         fetchProdutos();
-    }, [fetchProdutos]);
+        fetchCategorias(); 
+    }, [fetchProdutos, fetchCategorias]); 
 
     useEffect(() => {
         const handleGlobalKeyDown = (e) => {
@@ -63,7 +81,7 @@ function EstoquePage() {
                     e.preventDefault();
                     setFiltroCodigoBarras(scannedCode); 
                     fetchProdutos(scannedCode);       
-                    setScannedCode('');              
+                    setScannedCode('');                
                 }
             } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 setScannedCode(prevCode => prevCode + e.key);
@@ -100,19 +118,13 @@ function EstoquePage() {
         setModalOpen(true);
     };
 
+
     const handleSalvarProduto = async (formData, imagemFile) => {
         try {
-            const dataToSend = new FormData();
-            Object.keys(formData).forEach(key => {
-                if (key !== 'id_produto') dataToSend.append(key, formData[key]);
-            });
-            if (imagemFile) {
-                dataToSend.append('imagem', imagemFile);
-            }
-
             let produtoSalvo;
+            let isEdit = !!formData.id_produto;
 
-            if (formData.id_produto) {
+            if (isEdit) {
                 const response = await fetch(`http://localhost:3001/api/produtos/${formData.id_produto}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -120,7 +132,25 @@ function EstoquePage() {
                 });
                 if (!response.ok) throw new Error('Falha ao editar produto.');
                 produtoSalvo = await response.json();
+
+                if (imagemFile) {
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('imagem', imagemFile);
+                    await fetch(`http://localhost:3001/api/produtos/${produtoSalvo.id_produto}/upload-image`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: uploadFormData
+                    });
+                }
             } else {
+                const dataToSend = new FormData();
+                Object.keys(formData).forEach(key => {
+                    dataToSend.append(key, formData[key]);
+                });
+                if (imagemFile) {
+                    dataToSend.append('imagem', imagemFile);
+                }
+
                 const response = await fetch('http://localhost:3001/api/produtos', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -128,16 +158,7 @@ function EstoquePage() {
                 });
                 if (!response.ok) throw new Error('Falha ao cadastrar produto.');
                 produtoSalvo = await response.json();
-            }
-
-            if (imagemFile && produtoSalvo.id_produto) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('imagem', imagemFile);
-                await fetch(`http://localhost:3001/api/produtos/${produtoSalvo.id_produto}/upload-image`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: uploadFormData
-                });
+            
             }
 
             setModalOpen(false);
@@ -145,7 +166,7 @@ function EstoquePage() {
 
         } catch (error) {
             console.error("Erro ao salvar produto:", error);
-            alert(`Erro: ${error.message}`);
+            throw error; 
         }
     };
 
@@ -170,6 +191,11 @@ function EstoquePage() {
         setBarcodeModalOpen(true);
     };
 
+    const handleViewImage = (imageUrl) => {
+        setCurrentImageForView(imageUrl);
+        setImageModalOpen(true);
+    };
+
     if (loading && produtos.length === 0) return <p>Carregando produtos...</p>;
 
     return (
@@ -180,7 +206,7 @@ function EstoquePage() {
                     <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
                 </div>
                 <form onSubmit={handleFiltroSubmit} className="filtros-container">
-                    <div className="filtro-item" style={{flexGrow: 1}}>
+                    <div className="filtro-item">
                         <label>Nome</label>
                         <input 
                             type="text"
@@ -227,6 +253,7 @@ function EstoquePage() {
                                 onEdit={() => handleAbreModalEdicao(produto)}
                                 onToggleStatus={() => handleUpdateStatus(produto)}
                                 onGenerateBarcode={() => handleAbreModalEtiqueta(produto)}
+                                onViewImage={handleViewImage}
                             />
                         ))
                     ) : (
@@ -240,11 +267,17 @@ function EstoquePage() {
                 onClose={() => { setModalOpen(false); setProdutoEmEdicao(null); }}
                 produto={produtoEmEdicao}
                 onSave={handleSalvarProduto}
+                categorias={categorias}
             />
             <BarcodeModal
                 isOpen={isBarcodeModalOpen}
                 onClose={() => setBarcodeModalOpen(false)}
                 produto={produtoParaEtiqueta}
+            />
+            <ImageModal
+                isOpen={isImageModalOpen}
+                imageUrl={currentImageForView}
+                onClose={() => setImageModalOpen(false)}
             />
         </>
     );

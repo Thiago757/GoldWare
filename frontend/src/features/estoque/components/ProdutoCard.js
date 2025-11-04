@@ -1,11 +1,10 @@
 import React from 'react';
-import { FaEdit } from 'react-icons/fa';
-import { FaBarcode } from 'react-icons/fa';
+import { FaEdit, FaBarcode, FaEye } from 'react-icons/fa';
 import './ProdutoCard.css';
 
 const placeholderImage = 'https://i.imgur.com/gJZT2n2.png';
 
-function ProdutoCard({ produto, onEdit, onToggleStatus, onGenerateBarcode }) {
+function ProdutoCard({ produto, onEdit, onToggleStatus, onGenerateBarcode, onViewImage }) {
     const precoFormatado = `R$ ${parseFloat(produto.preco_venda).toFixed(2)}`;
     const statusClasse = produto.ativo === 'S' ? 'ativo' : 'inativo';
 
@@ -20,6 +19,18 @@ function ProdutoCard({ produto, onEdit, onToggleStatus, onGenerateBarcode }) {
                 <span className={`status-badge ${statusClasse}`}>
                     {produto.ativo === 'S' ? 'Ativo' : 'Inativo'}
                 </span>
+                {produto.imagem_url && (
+                    <button 
+                        className="view-image-btn" 
+                        onClick={(e) => { 
+                            e.stopPropagation()
+                            onViewImage(imageUrl); 
+                        }}
+                        title="Ver imagem completa"
+                    >
+                        <FaEye />
+                    </button>
+                )}
             </div>
             <div className="produto-info">
                 <div className="info-header">

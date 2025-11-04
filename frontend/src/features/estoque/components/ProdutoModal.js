@@ -3,7 +3,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import './ProdutoModal.css';
 import { FaUpload } from 'react-icons/fa';
 
-function ProdutoModal({ isOpen, onClose, produto, onSave }) {
+function ProdutoModal({ isOpen, onClose, produto, onSave, categorias = []}) {
     const [formData, setFormData] = useState({});
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
     const [previewImagem, setPreviewImagem] = useState(null);
@@ -16,7 +16,7 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                 setFormData(produto);
                 setPreviewImagem(produto.imagem_url);
             } else {
-                setFormData({ nome: '', descricao: '', preco_venda: '', custo: '', quantidade_estoque: '', categoria: '' });
+                setFormData({ nome: '', descricao: '', preco_venda: '', custo: '', quantidade_estoque: '', id_categoria: '' });
                 setPreviewImagem(null);
             }
             setError('');
@@ -42,7 +42,7 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const camposObrigatorios = ['nome', 'preco_venda', 'custo', 'quantidade_estoque', 'categoria'];
+        const camposObrigatorios = ['nome', 'preco_venda', 'custo', 'quantidade_estoque', 'id_categoria'];
         for (const campo of camposObrigatorios) {
             if (!formData[campo]) {
                 setError('Por favor, preencha todos os campos obrigatórios (*).');
@@ -86,8 +86,20 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                             <input type="number" name="quantidade_estoque" value={formData.quantidade_estoque || ''} onChange={handleChange} />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="categoria">Categoria*</label>
-                            <input type="text" name="categoria" value={formData.categoria || ''} onChange={handleChange} />
+                            <label htmlFor="id_categoria">Categoria*</label>
+                            <select 
+                                name="id_categoria"
+                                value={formData.id_categoria || ''}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Selecione uma categoria</option>
+                                {categorias.map((cat) => (
+                                    <option key={cat.id_categoria} value={cat.id_categoria}>
+                                        {cat.nome}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         {produto && (
                             <div className="form-group form-group-span-2">
