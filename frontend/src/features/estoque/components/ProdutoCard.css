@@ -22,6 +22,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: top;
 }
 .status-badge {
     position: absolute;
@@ -62,17 +63,27 @@
     font-size: 1.2rem;
     font-weight: 600;
     color: #1e2d3b;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.4rem;
 }
+
 .info-body {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid #f1f5f9;
 }
-.info-item {
-    text-align: center;
+
+.info-item:last-child {
+    text-align: right;
 }
+
 .info-item span {
     font-size: 0.8rem;
     color: #64748b;
@@ -90,11 +101,30 @@
 
 .produto-acoes {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background-color: #f8fafc;
     border-top: 1px solid #f1f5f9;
+    gap: 8px;
+}
+
+.produto-acoes button {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.produto-acoes button:hover {
+    background-color: #e2e8f0;
+    color: #334155;
 }
 
 .edit-btn {
@@ -121,6 +151,7 @@
     display: inline-block;
     width: 50px;
     height: 28px;
+    margin-left: auto;
 }
 .toggle-switch input {
     opacity: 0;
@@ -154,4 +185,27 @@
 }
 .toggle-switch input:checked + label:before {
     transform: translateX(22px);
+}
+
+.view-image-btn {
+    position: absolute;
+    bottom: 12px; /* Posição na parte inferior */
+    right: 12px;  /* Posição na parte direita */
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo escuro semi-transparente */
+    color: #fff;
+    border: none;
+    border-radius: 50%; /* Formato redondo */
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    z-index: 10; /* Garante que fique acima de outros elementos */
+    transition: background-color 0.2s ease;
+}
+
+.view-image-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
 }

@@ -3,23 +3,17 @@ import { AuthContext } from '../../../context/AuthContext';
 import './ProdutoModal.css';
 import { FaUpload } from 'react-icons/fa';
 
-function ProdutoModal({ isOpen, onClose, produto, onSave }) {
+function ProdutoModal({ isOpen, onClose, produto, onSave, categorias = []}) {
     const [formData, setFormData] = useState({});
     const [imagemSelecionada, setImagemSelecionada] = useState(null);
     const [previewImagem, setPreviewImagem] = useState(null);
     const [error, setError] = useState('');
     const { token } = useContext(AuthContext);
 
-    const [categorias, setCategorias] = useState([]);
-    const [loadingCategorias, setLoadingCategorias] = useState(false);
-
     useEffect(() => {
         if (isOpen) {
             if (produto) {
-                setFormData({
-                    ...produto,
-                    id_categoria: produto.id_categoria || '' 
-                });
+                setFormData(produto);
                 setPreviewImagem(produto.imagem_url);
             } else {
                 setFormData({ nome: '', descricao: '', preco_venda: '', custo: '', quantidade_estoque: '', id_categoria: '' });
@@ -27,27 +21,8 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
             }
             setError('');
             setImagemSelecionada(null);
-
-            const fetchCategoriasParaSelect = async () => {
-                if (!token) return;
-                setLoadingCategorias(true);
-                try {
-                    const response = await fetch('http://localhost:3001/api/categorias', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (!response.ok) throw new Error('Falha ao carregar categorias');
-                    const data = await response.json();
-                    setCategorias(data);
-                } catch (err) {
-                    setError(err.message);
-                } finally {
-                    setLoadingCategorias(false);
-                }
-            };
-
-            fetchCategoriasParaSelect();
         }
-    }, [produto, isOpen, token]);
+    }, [produto, isOpen]);
 
     if (!isOpen) return null;
 
@@ -112,16 +87,14 @@ function ProdutoModal({ isOpen, onClose, produto, onSave }) {
                         </div>
                         <div className="form-group">
                             <label htmlFor="id_categoria">Categoria*</label>
-                            <select
+                            <select 
                                 name="id_categoria"
                                 value={formData.id_categoria || ''}
                                 onChange={handleChange}
-                                disabled={loadingCategorias}
+                                required
                             >
-                                <option value="" disabled>
-                                    {loadingCategorias ? 'A carregar...' : 'Selecione a categoria'}
-                                </option>
-                                {categorias.map(cat => (
+                                <option value="">Selecione uma categoria</option>
+                                {categorias.map((cat) => (
                                     <option key={cat.id_categoria} value={cat.id_categoria}>
                                         {cat.nome}
                                     </option>
