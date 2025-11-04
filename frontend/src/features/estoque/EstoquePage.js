@@ -70,30 +70,23 @@ function EstoquePage() {
     }, [fetchProdutos, fetchCategorias]); 
 
     useEffect(() => {
-        const handleGlobalKeyDown = (e) => {
-            const targetTagName = e.target.tagName.toLowerCase();
-            if (['input', 'select', 'textarea'].includes(targetTagName)) {
-                return;
-            }
-
-            if (e.key === 'Enter') {
-                if (scannedCode) {
-                    e.preventDefault();
-                    setFiltroCodigoBarras(scannedCode); 
-                    fetchProdutos(scannedCode);       
-                    setScannedCode('');                
-                }
-            } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-                setScannedCode(prevCode => prevCode + e.key);
+         const fetchCategorias = async () => {
+            if (!token) return;
+            try {
+                const response = await fetch(`http://localhost:3001/api/categorias`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error('Falha ao buscar categorias');
+                const data = await response.json();
+                setCategorias(data);
+            } catch (error) {
+                console.error("Erro ao buscar categorias:", error);
             }
         };
-
-        document.addEventListener('keydown', handleGlobalKeyDown);
-
-        return () => {
-            document.removeEventListener('keydown', handleGlobalKeyDown);
-        };
-    }, [scannedCode, fetchProdutos]);
+        
+        fetchProdutos();
+        fetchCategorias();
+    }, [fetchProdutos, token]);
 
     const handleBarcodeKeyDown = (e) => {
         if (e.key === 'Enter') {
