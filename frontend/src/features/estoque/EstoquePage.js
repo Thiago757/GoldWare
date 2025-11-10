@@ -4,6 +4,7 @@ import ProdutoCard from './components/ProdutoCard';
 import ProdutoModal from './components/ProdutoModal';
 import BarcodeModal from './components/BarcodeModal';
 import ImageModal from '../../components/common/ImagemModal';
+import GerenciarCategoriasModal from '../../components/common/GerenciarCategoriasModal';
 import './EstoquePage.css';
 import '../vendas/VendasListPage.css';
 
@@ -22,6 +23,8 @@ function EstoquePage() {
     const [categorias, setCategorias] = useState([]);
     const [isImageModalOpen, setImageModalOpen] = useState(false);
     const [currentImageForView, setCurrentImageForView] = useState('');
+    const [isCategoriasModalOpen, setCategoriasModalOpen] = useState(false);
+    const [refreshProdutos, setRefreshProdutos] = useState(false);
 
     const fetchProdutos = useCallback(async (barcodeToSearch) => {
         if (!token) return;
@@ -67,26 +70,7 @@ function EstoquePage() {
     useEffect(() => {
         fetchProdutos();
         fetchCategorias(); 
-    }, [fetchProdutos, fetchCategorias]); 
-
-    useEffect(() => {
-         const fetchCategorias = async () => {
-            if (!token) return;
-            try {
-                const response = await fetch(`http://localhost:3001/api/categorias`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) throw new Error('Falha ao buscar categorias');
-                const data = await response.json();
-                setCategorias(data);
-            } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
-            }
-        };
-        
-        fetchProdutos();
-        fetchCategorias();
-    }, [fetchProdutos, token]);
+    }, [fetchProdutos, fetchCategorias, refreshProdutos]);
 
     const handleBarcodeKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -156,6 +140,7 @@ function EstoquePage() {
 
             setModalOpen(false);
             fetchProdutos();
+            fetchCategorias();
 
         } catch (error) {
             console.error("Erro ao salvar produto:", error);
@@ -189,6 +174,12 @@ function EstoquePage() {
         setImageModalOpen(true);
     };
 
+    const handleCategoriasClose = () => {
+        setCategoriasModalOpen(false);
+        setRefreshProdutos(prev => !prev);
+        fetchCategorias();
+    };
+
     if (loading && produtos.length === 0) return <p>Carregando produtos...</p>;
 
     return (
@@ -196,7 +187,16 @@ function EstoquePage() {
             <div className="estoque-container">
                 <div className="estoque-header">
                     <h1>Gerenciamento de Estoque</h1>
-                    <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
+                     <div className="header-botoes-estoque">
+                        <button 
+                            onClick={() => setCategoriasModalOpen(true)} 
+                            className="add-produto-btn" 
+                            style={{backgroundColor: '#6b7280', marginRight: '10px'}}
+                        >
+                            Gerir Categorias
+                        </button>
+                        <button onClick={handleAbreModalCadastro} className="add-produto-btn">+ Cadastrar Produto</button>
+                    </div>
                 </div>
                 <form onSubmit={handleFiltroSubmit} className="filtros-container">
                     <div className="filtro-item">
@@ -271,6 +271,10 @@ function EstoquePage() {
                 isOpen={isImageModalOpen}
                 imageUrl={currentImageForView}
                 onClose={() => setImageModalOpen(false)}
+            />
+            <GerenciarCategoriasModal
+                isOpen={isCategoriasModalOpen}
+                onClose={handleCategoriasClose}
             />
         </>
     );
