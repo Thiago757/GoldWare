@@ -125,6 +125,15 @@
     width: 100%;
 }
 
+.filtro-map-clientes {
+    padding: 10px 14px;
+    border-radius: var(--raio-borda-item);
+    border: 1px solid var(--cor-borda);
+    background-color: var(--cor-fundo);
+    font-size: 0.9rem;
+    width: 100%; 
+}
+
 .react-datepicker-wrapper input {
     width: 100%;
 }
@@ -294,4 +303,6 @@
     .receber-table-container td {
         padding: 10px 16px;
     }
+    
 }
+

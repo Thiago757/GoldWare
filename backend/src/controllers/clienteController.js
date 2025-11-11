@@ -1,5 +1,6 @@
-const pool = require('../config/database');
+const pool = require('../config/database'); // Você usa '../config/database', está perfeito
 
+// Função não modificada - já estava ótima
 exports.searchClientes = async (req, res) => {
     try {
         const searchTerm = req.query.q || '';
@@ -24,24 +25,35 @@ exports.searchClientes = async (req, res) => {
     }
 };
 
-
+// --- FUNÇÃO MODIFICADA ---
 exports.createCliente = async (req, res) => {
     try {
-        let { nome, email, cpf, telefone, endereco } = req.body;
+        // --- MUDANÇA AQUI ---
+        // Pegamos todos os campos do novo formulário
+        const { 
+            nome, email, cpf, telefone, 
+            cep, logradouro, numero, complemento, bairro, id_cidade 
+        } = req.body;
 
-        if (!nome || !email || !cpf || !telefone || !endereco) {
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        // --- MUDANÇA AQUI ---
+        // Validamos os novos campos principais
+        if (!nome || !email || !cpf || !id_cidade) {
+            return res.status(400).json({ message: 'Campos obrigatórios (Nome, Email, CPF, Cidade) estão faltando.' });
         }
 
-        if (cpf) cpf = cpf.replace(/[^\d]/g, "");
+        // Suas limpezas de CPF e Telefone (mantidas)
+        const cpfLimpo = cpf ? cpf.replace(/[^\d]/g, "") : null;
+        const telefoneLimpo = telefone ? telefone.replace(/[^\d]/g, "") : null;
 
-        if (telefone) telefone = telefone.replace(/[^\d]/g, "");
-
+        // --- MUDANÇA AQUI ---
+        // Query de INSERT atualizada com todas as colunas de endereço
+        // Também adicionamos 'status' e 'data_cadastro' para ser 100% compatível
+        // com o seu script de banco de dados (que espera 'status' e tem default).
         const novoClienteQuery = await pool.query(
-            `INSERT INTO clientes (nome, email, cpf, telefone, endereco) 
-             VALUES ($1, $2, $3, $4, $5) 
-             RETURNING id_cliente, nome`,
-            [nome, email, cpf, telefone, endereco]
+            `INSERT INTO clientes (nome, email, cpf, telefone, cep, logradouro, numero, complemento, bairro, id_cidade, status, data_cadastro)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'ativo', CURRENT_TIMESTAMP)
+             RETURNING *`, // Mudado para RETURNING * para enviar o cliente completo ao frontend
+            [nome, email, cpfLimpo, telefoneLimpo, cep, logradouro, numero, complemento, bairro, id_cidade]
         );
 
         const clienteSalvo = novoClienteQuery.rows[0];
@@ -57,6 +69,7 @@ exports.createCliente = async (req, res) => {
     }
 };
 
+// Função não modificada - já estava ótima
 exports.listarClientes = async (req, res) => {
     try {
         const { nome, cpf, status } = req.query;
@@ -93,6 +106,7 @@ exports.listarClientes = async (req, res) => {
     }
 };
 
+// Função não modificada - já estava ótima
 exports.updateStatusCliente = async (req, res) => {
     try {
         const { id } = req.params;
@@ -116,9 +130,10 @@ exports.updateStatusCliente = async (req, res) => {
     }
 };
 
+// Função não modificada - já estava ótima
 exports.getClienteDetalhes = async (req, res) => {
     try {
-        const { id } = req.params; // Pega o ID do cliente da URL
+        const { id } = req.params; 
 
         const result = await pool.query('SELECT * FROM clientes WHERE id_cliente = $1', [id]);
 
@@ -134,26 +149,41 @@ exports.getClienteDetalhes = async (req, res) => {
     }
 };
 
+// --- FUNÇÃO MODIFICADA ---
 exports.updateCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        let { nome, email, cpf, telefone, endereco } = req.body;
+        
+        // --- MUDANÇA AQUI ---
+        // Pegamos todos os campos do novo formulário
+        const { 
+            nome, email, cpf, telefone, 
+            cep, logradouro, numero, complemento, bairro, id_cidade 
+        } = req.body;
 
-        if (!nome || !email || !cpf || !telefone || !endereco) {
-            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        // --- MUDANÇA AQUI ---
+        // Validamos os novos campos principais
+        if (!nome || !email || !cpf || !id_cidade) {
+            return res.status(400).json({ message: 'Campos obrigatórios (Nome, Email, CPF, Cidade) estão faltando.' });
         }
 
-        if (cpf) cpf = cpf.replace(/[^\d]/g, "");
-        if (telefone) telefone = telefone.replace(/[^\d]/g, "");
+        // Suas limpezas de CPF e Telefone (mantidas)
+        const cpfLimpo = cpf ? cpf.replace(/[^\d]/g, "") : null;
+        const telefoneLimpo = telefone ? telefone.replace(/[^\d]/g, "") : null;
 
+        // --- MUDANÇA AQUI ---
+        // Query de UPDATE atualizada com todas as colunas de endereço
         const result = await pool.query(
-            `UPDATE clientes SET nome = $1, email = $2, cpf = $3, telefone = $4, endereco = $5
-             WHERE id_cliente = $6 RETURNING *`,
-            [nome, email, cpf, telefone, endereco, id]
+            `UPDATE clientes 
+             SET nome = $1, email = $2, cpf = $3, telefone = $4, cep = $5, 
+                 logradouro = $6, numero = $7, complemento = $8, bairro = $9, id_cidade = $10
+             WHERE id_cliente = $11 RETURNING *`,
+            [nome, email, cpfLimpo, telefoneLimpo, cep, logradouro, numero, complemento, bairro, id_cidade, id]
         );
 
         if (result.rowCount === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
         res.status(200).json(result.rows[0]);
+
     } catch (error) {
         console.error("Erro ao atualizar cliente:", error);
         res.status(500).json({ message: 'Erro no servidor.' });
