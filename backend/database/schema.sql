@@ -1,15 +1,14 @@
 CREATE TABLE estados (
-    id_estado SERIAL PRIMARY KEY,
+    id_estado INT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     sigla VARCHAR(2) NOT NULL
 );
 
 CREATE TABLE cidades (
-    id_cidade SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    id_estado INT REFERENCES estados(id_estado)
+    id_cidade BIGSERIAL PRIMARY KEY,
+    id_estado INT REFERENCES estados(id_estado),
+    nome VARCHAR(255) NOT NULL
 );
-
 CREATE TABLE categorias (
     id_categoria SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE

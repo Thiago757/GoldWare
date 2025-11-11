@@ -14,6 +14,7 @@ const servicos = require('./src/api/servicos');
 const categorias = require('./src/api/categorias');
 const clienteRoutes = require('./src/api/clientes');
 const relatoriosRoutes = require('./src/api/relatorios'); 
+const contasReceberRoutes = require('./src/api/receber');
 
 const ordensServicos = require('./src/api/ordensServicos');
 const app = express();
@@ -33,7 +34,11 @@ app.use('/api/tipos-servico', ServicoRoutes);
 app.use('/api/servicos', servicos);
 app.use('/api/categorias', categorias);
 app.use('/api/ordens-servico', ordensServicos);
-
+app.use('/api/cidades', require('./src/api/cidades'));
+app.use('/api/contas-bancarias', require('./src/api/contasBancarias'));
+app.use('/api/formas-pagamento', require('./src/api/formasPagamento'));
+app.use('/api/recebimentos', require('./src/api/recebimentos'));
+app.use('/api/receber', contasReceberRoutes);
 
 pool.query('SELECT NOW()')
   .then(res => console.log('Banco de dados conectado em:', res.rows[0].now))
