@@ -1,35 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { IMaskInput } from 'react-imask';
-import './ConfirmationModal.css'; 
+import './AddClienteModal.css'; 
+
+const defaultFormState = {
+    nome: '',
+    email: '',
+    cpf: '',
+    telefone: '',
+    cep: '',
+    logradouro: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    id_cidade: '', 
+};
+
 
 function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
     const { token } = useContext(AuthContext);
-    
-    // --- ETAPA 1: Novos estados para todos os campos do banco ---
-    const [nome, setNome] = useState('');
-    const [email, setEmail] = useState('');
-    const [cpf, setCpf] = useState('');
-    const [telefone, setTelefone] = useState('');
-    const [cep, setCep] = useState('');
-    const [logradouro, setLogradouro] = useState('');
-    const [numero, setNumero] = useState('');
-    const [complemento, setComplemento] = useState('');
-    const [bairro, setBairro] = useState('');
-    const [id_cidade, setId_cidade] = useState(''); // Armazena o ID da cidade selecionada
-    
-    // --- ETAPA 2: Estado para armazenar a lista de cidades vinda do backend ---
-    const [cidades, setCidades] = useState([]); // ex: [{id_cidade: 1, nome: 'Criciúma', sigla: 'SC'}]
-    
+    const [formData, setFormData] = useState(defaultFormState);
+    const [cidades, setCidades] = useState([]);
     const [error, setError] = useState('');
-    const [loadingCep, setLoadingCep] = useState(false);
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
+    const [loadingCep, setLoadingCep] = useState(false);     
 
-    // --- ETAPA 3: Buscar a lista de cidades quando o modal abrir ---
     useEffect(() => {
         if (isOpen && token) {
             const fetchCidades = async () => {
                 try {
-                    // Você precisará criar esta rota no seu backend (veja passo 2)
                     const response = await fetch('http://localhost:3001/api/cidades', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -43,32 +42,44 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
             };
             fetchCidades();
         }
-    }, [isOpen, token]); // Roda sempre que o modal abrir
+    }, [isOpen, token]);
 
-    // --- ETAPA 4: Popular campos se estiver em modo de EDIÇÃO ---
     useEffect(() => {
         if (isOpen) {
-            if (cliente) { // Modo Edição
-                setNome(cliente.nome || '');
-                setEmail(cliente.email || '');
-                setCpf(cliente.cpf || '');
-                setTelefone(cliente.telefone || '');
-                setCep(cliente.cep || '');
-                setLogradouro(cliente.logradouro || '');
-                setNumero(cliente.numero || '');
-                setComplemento(cliente.complemento || '');
-                setBairro(cliente.bairro || '');
-                setId_cidade(cliente.id_cidade || '');
-            } else { // Modo Criação
-                handleClose(false); // Limpa os campos
+            if (cliente) {
+                setFormData({
+                    nome: cliente.nome || '',
+                    email: cliente.email || '',
+                    cpf: cliente.cpf || '',
+                    telefone: cliente.telefone || '',
+                    cep: cliente.cep || '',
+                    logradouro: cliente.logradouro || '',
+                    numero: cliente.numero || '',
+                    complemento: cliente.complemento || '',
+                    bairro: cliente.bairro || '',
+                    id_cidade: cliente.id_cidade || '',
+                });
+            } else {
+                setFormData(defaultFormState);
             }
+            setError('');
+            setLoadingCep(false);
+            setLoadingSubmit(false);
         }
-    }, [cliente, isOpen]); // Roda se o 'cliente' (prop) ou 'isOpen' mudar
+    }, [cliente, isOpen]);
 
-    // --- ETAPA 5: Função para buscar CEP (ViaCEP) ---
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    
+    const handleMaskedChange = (value, name) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
     const handleCepSearch = async () => {
-        const cepLimpo = cep.replace(/\D/g, ''); // Remove máscara
-        if (cepLimpo.length !== 8) return; // Só busca com 8 dígitos
+        const cepLimpo = formData.cep.replace(/\D/g, '');
+        if (cepLimpo.length !== 8) return; 
 
         setLoadingCep(true);
         setError('');
@@ -79,22 +90,20 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
                 throw new Error('CEP não encontrado.');
             }
             
-            setLogradouro(data.logradouro);
-            setBairro(data.bairro);
+            const cidadeEncontrada = cidades.find(c => 
+                c.nome.toLowerCase() === data.localidade.toLowerCase() &&
+                c.sigla.toLowerCase() === data.uf.toLowerCase()
+            );
             
-            // Tenta encontrar a cidade do ViaCEP na nossa lista do banco
-            // Isso funciona se o nome da cidade no ViaCEP for igual ao do seu banco
-            if (cidades.length > 0) {
-                const cidadeEncontrada = cidades.find(c => 
-                    c.nome.toLowerCase() === data.localidade.toLowerCase() &&
-                    c.sigla.toLowerCase() === data.uf.toLowerCase()
-                );
-                
-                if (cidadeEncontrada) {
-                    setId_cidade(cidadeEncontrada.id_cidade);
-                } else {
-                    setError(`Cidade (${data.localidade}-${data.uf}) não encontrada no cadastro.`);
-                }
+            setFormData(prev => ({
+                ...prev,
+                logradouro: data.logradouro,
+                bairro: data.bairro,
+                id_cidade: cidadeEncontrada ? cidadeEncontrada.id_cidade : ''
+            }));
+            
+            if (!cidadeEncontrada) {
+                setError(`Cidade (${data.localidade}-${data.uf}) não encontrada no cadastro.`);
             }
             
         } catch (err) {
@@ -104,28 +113,28 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
         }
     };
 
-    // --- ETAPA 6: handleSubmit atualizado com TODOS os campos ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
-        if (!id_cidade) {
+        if (!formData.id_cidade) {
             setError('Por favor, selecione uma cidade.');
             return;
         }
 
-        // Monta o 'body' exatamente como o backend/banco espera
+        setLoadingSubmit(true);
+
         const clienteData = {
-            nome,
-            email,
-            cpf,
-            telefone,
-            cep,
-            logradouro,
-            numero,
-            complemento,
-            bairro,
-            id_cidade: Number(id_cidade) // Garante que é um número
+            nome: formData.nome,
+            email: formData.email,
+            cpf: formData.cpf.replace(/\D/g, ''),
+            telefone: formData.telefone.replace(/\D/g, ''),
+            cep: formData.cep.replace(/\D/g, ''),
+            logradouro: formData.logradouro,
+            numero: formData.numero,
+            complemento: formData.complemento || null,
+            bairro: formData.bairro,
+            id_cidade: Number(formData.id_cidade)
         };
 
         try {
@@ -138,24 +147,26 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(clienteData), // Envia o objeto completo
+                body: JSON.stringify(clienteData), 
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message);
+            if (!response.ok) throw new Error(data.message || 'Erro ao salvar cliente');
             
-            onClientSaved(cliente ? data : data.cliente);
-            handleClose();
+            onClientSaved(cliente ? data : (data.cliente || data));
+            handleClose(true);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoadingSubmit(false);
         }
     };
     
-    // --- ETAPA 7: Limpar TODOS os campos ---
     const handleClose = (shouldCloseModal = true) => {
-        setNome(''); setEmail(''); setCpf(''); setTelefone(''); setError('');
-        setCep(''); setLogradouro(''); setNumero(''); setComplemento(''); 
-        setBairro(''); setId_cidade(''); setLoadingCep(false);
+        setFormData(defaultFormState);
+        setError('');
+        setLoadingCep(false);
+        setLoadingSubmit(false);
         
         if (shouldCloseModal) {
             onClose();
@@ -164,107 +175,134 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
 
     if (!isOpen) return null;
 
-    // --- ETAPA 8: JSX ATUALIZADO com todos os campos ---
     return (
-        <div className="modal-overlay">
-            <form onSubmit={handleSubmit} className="modal-content" style={{textAlign: 'left'}}>
+        <div className="modal-overlay" onClick={() => handleClose(true)}>
+            <form onSubmit={handleSubmit} className="modal-content" style={{textAlign: 'left'}} onClick={(e) => e.stopPropagation()}> 
+                
+                <button type="button" className="modal-close-btn" onClick={() => handleClose(true)}>&times;</button>
+                
                 <h2>{cliente ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}</h2>
                 
-                {/* --- DADOS PESSOAIS --- */}
-                <div className="modal-form-group">
-                    <label htmlFor="nome">Nome Completo*</label>
-                    <input id="nome" type="text" value={nome} onChange={e => setNome(e.target.value)} required />
-                </div>
-                
-                {/* Grupo de 2 colunas */}
-                <div className="modal-form-row">
+                <div className="modal-form-body"> 
+                    
                     <div className="modal-form-group">
-                        <label htmlFor="email">Email*</label>
-                        <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="modal-form-group">
-                        <label htmlFor="cpf">CPF*</label>
-                        <IMaskInput
-                            mask="000.000.000-00"
-                            value={cpf}
-                            onAccept={(value) => setCpf(value)}
-                            id="cpf" required
-                        />
-                    </div>
-                </div>
-
-                <div className="modal-form-group">
-                    <label htmlFor="telefone">Telefone*</label>
-                    <IMaskInput
-                        mask="(00) 00000-0000"
-                        value={telefone}
-                        onAccept={(value) => setTelefone(value)}
-                        id="telefone" required
-                    />
-                </div>
-
-                {/* --- ENDEREÇO --- */}
-                <hr className="modal-divider" />
-                <h3>Endereço</h3>
-
-                <div className="modal-form-group">
-                    <label htmlFor="cep">CEP*</label>
-                    <div className="input-with-button">
-                        <IMaskInput
-                            mask="00000-000"
-                            value={cep}
-                            onAccept={(value) => setCep(value)}
-                            id="cep" required
-                        />
-                        <button type="button" onClick={handleCepSearch} disabled={loadingCep} className="modal-button-cep">
-                            {loadingCep ? '...' : 'Buscar'}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="modal-form-group">
-                    <label htmlFor="logradouro">Logradouro* (Rua, Av.)</label>
-                    <input id="logradouro" type="text" value={logradouro} onChange={e => setLogradouro(e.target.value)} required />
-                </div>
-
-                <div className="modal-form-row">
-                    <div className="modal-form-group">
-                        <label htmlFor="numero">Número*</label>
-                        <input id="numero" type="text" value={numero} onChange={e => setNumero(e.target.value)} required />
-                    </div>
-                    <div className="modal-form-group">
-                        <label htmlFor="complemento">Complemento</label>
-                        <input id="complemento" type="text" value={complemento} onChange={e => setComplemento(e.target.value)} />
-                    </div>
-                </div>
-
-                <div className="modal-form-row">
-                    <div className="modal-form-group">
-                        <label htmlFor="bairro">Bairro*</label>
-                        <input id="bairro" type="text" value={bairro} onChange={e => setBairro(e.target.value)} required />
+                        <label htmlFor="nome">Nome Completo*</label>
+                        <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required />
                     </div>
                     
-                    <div className="modal-form-group form-group-cidade">
-                        <label htmlFor="cidade">Cidade*</label>
-                        <select id="cidade" value={id_cidade} onChange={e => setId_cidade(e.target.value)} required>
-                            <option value="">Selecione...</option>
-                            {cidades.map(cidade => (
-                                <option key={cidade.id_cidade} value={cidade.id_cidade}>
-                                    {cidade.nome} - {cidade.sigla}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="modal-form-row">
+                        <div className="modal-form-group">
+                            <label htmlFor="email">Email*</label>
+                            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                        </div>
+                        <div className="modal-form-group">
+                            <label htmlFor="cpf">CPF*</label>
+                            <IMaskInput
+                                mask="000.000.000-00"
+                                id="cpf"
+                                name="cpf"
+                                value={formData.cpf}
+                                onAccept={(value) => handleMaskedChange(value, 'cpf')}
+                                required
+                            />
+                        </div>
                     </div>
+
+                    <div className="modal-form-group">
+                        <label htmlFor="telefone">Telefone*</label>
+                        <IMaskInput
+                            mask="(00) 00000-0000"
+                            id="telefone"
+                            name="telefone"
+                            value={formData.telefone}
+                            onAccept={(value) => handleMaskedChange(value, 'telefone')}
+                            required
+                        />
+                    </div>
+
+                    <hr className="modal-divider" />
+                    <h3>Endereço</h3>
+
+                    <div className="modal-form-group">
+                        <label htmlFor="cep">CEP*</label>
+                        <div className="input-with-button">
+                            <IMaskInput
+                                mask="00000-000"
+                                id="cep"
+                                name="cep"
+                                value={formData.cep}
+                                onAccept={(value) => handleMaskedChange(value, 'cep')}
+                                required
+                            />
+                            <button type="button" onClick={handleCepSearch} disabled={loadingCep} className="modal-button-cep">
+                                {loadingCep ? '...' : 'Buscar'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="modal-form-group">
+                        <label htmlFor="logradouro">Logradouro* (Rua, Av.)</label>
+                        <input id="logradouro" name="logradouro" type="text" value={formData.logradouro} onChange={handleChange} required />
+                    </div>
+
+                    <div className="modal-form-row">
+                        <div className="modal-form-group">
+                            <label htmlFor="numero">Número*</label>
+                            <input id="numero" name="numero" type="text" value={formData.numero} onChange={handleChange} required />
+                        </div>
+                        <div className="modal-form-group">
+                            <label htmlFor="complemento">Complemento</label>
+                            <input id="complemento" name="complemento" type="text" value={formData.complemento} onChange={handleChange} />
+                        </div>
+                    </div>
+
+                    <div className="modal-form-row">
+                        <div className="modal-form-group">
+                            <label htmlFor="bairro">Bairro*</label>
+                            <input id="bairro" name="bairro" type="text" value={formData.bairro} onChange={handleChange} required />
+                        </div>
+                        
+                        <div className="modal-form-group form-group-cidade">
+                            <label htmlFor="cidade">Cidade*</label>
+                            <select id="cidade" name="id_cidade" value={formData.id_cidade} onChange={handleChange} required>
+                                <option value="">Selecione...</option>
+                                {cidades.map(cidade => (
+                                    <option key={cidade.id_cidade} value={cidade.id_cidade}>
+                                        {cidade.nome} - {cidade.sigla}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                
                 </div>
 
-                {error && <p className="modal-error-message">{error}</p>}
-                
                 <div className="modal-actions">
-                    <button type="button" onClick={() => handleClose(true)} className="modal-button cancel">Cancelar</button>
-                    <button type="submit" className="modal-button confirm save">Salvar</button>
+                    {error && <p className="modal-error-message">{error}</p>}
+
+                    {!error && <div className="modal-error-spacer"></div>}
+
+                    <div className="modal-button-group">
+                        <button 
+                            type="button" 
+                            onClick={() => handleClose(true)} 
+                            className="modal-button cancel" 
+                            disabled={loadingSubmit}
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="modal-button confirm save" 
+                            disabled={loadingCep || loadingSubmit}
+                        >
+                            {loadingSubmit ? 'Salvando...' : 'Salvar'}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     );
 }
+
 export default AddClienteModal;
