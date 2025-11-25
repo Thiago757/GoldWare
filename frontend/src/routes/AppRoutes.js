@@ -23,6 +23,7 @@ import CategoriaProdutosPage from '../features/settings/CategoriaProdutosPage';
 import OSDetailPage from '../features/servicos/OSDetailPage';
 import ReceberPage from '../features/receber/ReceberPage';
 import PagarPage from '../features/pagar/PagarPage';
+import ExtratoPage from '../features/financeiro/ExtratoPage';
 
 function AppRoutes() {
     return (
@@ -42,7 +43,8 @@ function AppRoutes() {
             <Route path="/relatorios" element={<ProtectedRoute><RelatoriosPage /></ProtectedRoute>} />
             <Route path="/receber" element={<ProtectedRoute><ReceberPage /></ProtectedRoute>} />
             <Route path="/pagar" element={<ProtectedRoute><PagarPage /></ProtectedRoute>} />
-            <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
+            <Route path="/extrato" element={<ProtectedRoute><ExtratoPage /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />            
             <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}>
                 <Route index element={<h2>Selecione uma categoria de configuração</h2>} />
                 <Route path="servicos/tipos" element={<TiposServicoSettingsPage />} />

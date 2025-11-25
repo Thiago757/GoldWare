@@ -6,8 +6,9 @@ import './AddClienteModal.css';
 const defaultFormState = {
     nome: '',
     email: '',
-    cpf: '',
+    cnpj: '',
     telefone: '',
+    responsavel: '',
     cep: '',
     logradouro: '',
     numero: '',
@@ -16,8 +17,7 @@ const defaultFormState = {
     id_cidade: '', 
 };
 
-
-function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
+function AddFornecedorModal({ isOpen, onClose, onSaved, fornecedor }) {
     const { token } = useContext(AuthContext);
     const [formData, setFormData] = useState(defaultFormState);
     const [cidades, setCidades] = useState([]);
@@ -46,18 +46,19 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
 
     useEffect(() => {
         if (isOpen) {
-            if (cliente) {
+            if (fornecedor) {
                 setFormData({
-                    nome: cliente.nome || '',
-                    email: cliente.email || '',
-                    cpf: cliente.cpf || '',
-                    telefone: cliente.telefone || '',
-                    cep: cliente.cep || '',
-                    logradouro: cliente.logradouro || '',
-                    numero: cliente.numero || '',
-                    complemento: cliente.complemento || '',
-                    bairro: cliente.bairro || '',
-                    id_cidade: cliente.id_cidade || '',
+                    nome: fornecedor.nome || '',
+                    email: fornecedor.email || '',
+                    cnpj: fornecedor.cpf_cnpj || '', // NO BANCO É cpf_cnpj
+                    telefone: fornecedor.telefone || '',
+                    responsavel: fornecedor.responsavel || '',
+                    cep: fornecedor.cep || '',
+                    logradouro: fornecedor.logradouro || '',
+                    numero: fornecedor.numero || '',
+                    complemento: fornecedor.complemento || '',
+                    bairro: fornecedor.bairro || '',
+                    id_cidade: fornecedor.id_cidade || '',
                 });
             } else {
                 setFormData(defaultFormState);
@@ -66,7 +67,7 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
             setLoadingCep(false);
             setLoadingSubmit(false);
         }
-    }, [cliente, isOpen]);
+    }, [fornecedor, isOpen]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -124,36 +125,37 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
 
         setLoadingSubmit(true);
 
-        const clienteData = {
+        const fornecedorData = {
             nome: formData.nome,
             email: formData.email,
-            cpf: formData.cpf.replace(/\D/g, ''),
+            cnpj: formData.cnpj.replace(/[^\d]/g, ""),
             telefone: formData.telefone.replace(/\D/g, ''),
+            responsavel: formData.responsavel,
             cep: formData.cep.replace(/\D/g, ''),
             logradouro: formData.logradouro,
             numero: formData.numero,
-            complemento: formData.complemento || null,
+            complemento: formData.complemento,
             bairro: formData.bairro,
             id_cidade: Number(formData.id_cidade)
         };
 
         try {
-            const url = cliente
-                ? `http://localhost:3001/api/clientes/${cliente.id_cliente}`
-                : 'http://localhost:3001/api/clientes';
+            const url = fornecedor
+                ? `http://localhost:3001/api/fornecedores/${fornecedor.id_fornecedor}`
+                : 'http://localhost:3001/api/fornecedores';
             
-            const method = cliente ? 'PUT' : 'POST';
+            const method = fornecedor ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(clienteData), 
+                body: JSON.stringify(fornecedorData), 
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao salvar cliente');
+            if (!response.ok) throw new Error(data.error || data.message || 'Erro ao salvar fornecedor');
             
-            onClientSaved(cliente ? data : (data.cliente || data));
+            onSaved();
             handleClose(true);
         } catch (err) {
             setError(err.message);
@@ -181,50 +183,62 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
                 
                 <button type="button" className="modal-close-btn" onClick={() => handleClose(true)}>&times;</button>
                 
-                <h2>{cliente ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}</h2>
+                <h2>{fornecedor ? 'Editar Fornecedor' : 'Cadastrar Novo Fornecedor'}</h2>
                 
                 <div className="modal-form-body"> 
                     
                     <div className="modal-form-group">
-                        <label htmlFor="nome">Nome Completo*</label>
+                        <label htmlFor="nome">Razão Social / Nome*</label>
                         <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} required />
                     </div>
                     
                     <div className="modal-form-row">
                         <div className="modal-form-group">
-                            <label htmlFor="email">Email*</label>
-                            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                            <label htmlFor="email">Email</label>
+                            <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} />
                         </div>
                         <div className="modal-form-group">
-                            <label htmlFor="cpf">CPF*</label>
+                            <label htmlFor="cnpj">CNPJ*</label>
                             <IMaskInput
-                                mask="000.000.000-00"
-                                id="cpf"
-                                name="cpf"
-                                value={formData.cpf}
-                                onAccept={(value) => handleMaskedChange(value, 'cpf')}
+                                mask="00.000.000/0000-00"
+                                id="cnpj"
+                                name="cnpj"
+                                value={formData.cnpj}
+                                onAccept={(value) => handleMaskedChange(value, 'cnpj')}
                                 required
                             />
                         </div>
                     </div>
 
-                    <div className="modal-form-group">
-                        <label htmlFor="telefone">Telefone*</label>
-                        <IMaskInput
-                            mask="(00) 00000-0000"
-                            id="telefone"
-                            name="telefone"
-                            value={formData.telefone}
-                            onAccept={(value) => handleMaskedChange(value, 'telefone')}
-                            required
-                        />
+                    <div className="modal-form-row">
+                        <div className="modal-form-group">
+                            <label htmlFor="telefone">Telefone</label>
+                            <IMaskInput
+                                mask="(00) 00000-0000"
+                                id="telefone"
+                                name="telefone"
+                                value={formData.telefone}
+                                onAccept={(value) => handleMaskedChange(value, 'telefone')}
+                            />
+                        </div>
+                        <div className="modal-form-group">
+                            <label htmlFor="responsavel">Responsável</label>
+                            <input 
+                                id="responsavel" 
+                                name="responsavel" 
+                                type="text" 
+                                value={formData.responsavel} 
+                                onChange={handleChange} 
+                                placeholder="Ex: João Silva"
+                            />
+                        </div>
                     </div>
 
                     <hr className="modal-divider" />
                     <h3>Endereço</h3>
 
                     <div className="modal-form-group">
-                        <label htmlFor="cep">CEP*</label>
+                        <label htmlFor="cep">CEP</label>
                         <div className="input-with-button">
                             <IMaskInput
                                 mask="00000-000"
@@ -232,7 +246,6 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
                                 name="cep"
                                 value={formData.cep}
                                 onAccept={(value) => handleMaskedChange(value, 'cep')}
-                                required
                             />
                             <button type="button" onClick={handleCepSearch} disabled={loadingCep} className="modal-button-cep">
                                 {loadingCep ? '...' : 'Buscar'}
@@ -241,14 +254,14 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
                     </div>
 
                     <div className="modal-form-group">
-                        <label htmlFor="logradouro">Logradouro* (Rua, Av.)</label>
+                        <label htmlFor="logradouro">Logradouro (Rua/Av)*</label>
                         <input id="logradouro" name="logradouro" type="text" value={formData.logradouro} onChange={handleChange} required />
                     </div>
 
                     <div className="modal-form-row">
                         <div className="modal-form-group">
-                            <label htmlFor="numero">Número*</label>
-                            <input id="numero" name="numero" type="text" value={formData.numero} onChange={handleChange} required />
+                            <label htmlFor="numero">Número</label>
+                            <input id="numero" name="numero" type="text" value={formData.numero} onChange={handleChange} />
                         </div>
                         <div className="modal-form-group">
                             <label htmlFor="complemento">Complemento</label>
@@ -258,8 +271,8 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
 
                     <div className="modal-form-row">
                         <div className="modal-form-group">
-                            <label htmlFor="bairro">Bairro*</label>
-                            <input id="bairro" name="bairro" type="text" value={formData.bairro} onChange={handleChange} required />
+                            <label htmlFor="bairro">Bairro</label>
+                            <input id="bairro" name="bairro" type="text" value={formData.bairro} onChange={handleChange} />
                         </div>
                         
                         <div className="modal-form-group form-group-cidade">
@@ -305,4 +318,4 @@ function AddClienteModal({ isOpen, onClose, onClientSaved, cliente }) {
     );
 }
 
-export default AddClienteModal;
+export default AddFornecedorModal;

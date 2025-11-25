@@ -68,15 +68,103 @@
 .modal-button.confirm.save { background-color: #16a34a; }
 .modal-button.confirm.save:hover { background-color: #15803d; }
 @keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); display: flex;
+    justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px);
+}
+
+/* * CORREÇÃO: Fundi suas duas regras '.modal-content' em uma só.
+ * Usei o max-width de 500px e o text-align: left do seu formulário.
+*/
+.modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 500px; /* Garante que o modal não seja muito largo */
+    position: relative;
+    z-index: 1001; /* Acima do overlay */
+    text-align: left; /* Alinha o texto à esquerda */
+    animation: fadeInModal 0.3s ease-out;
+}
+ 
+.modal-content h2 {
+    color: #333;
+    font-size: 1.5em;
+    margin-top: 0; /* Limpado */
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.modal-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 0.95em;
+}
+
+.modal-textarea {
+    width: 100%; /* Mudado de calc() para 100% para consistência */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    resize: vertical;
+    min-height: 80px;
+    box-sizing: border-box; /* Importante! */
+}
+
+.modal-textarea:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+}
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+.modal-button { border: none; padding: 10px 25px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.modal-button.cancel { background-color: #e2e8f0; color: #475569; }
+.modal-button.cancel:hover { background-color: #cbd5e1; }
+.modal-button.confirm { background-color: #ef4444; color: white; }
+.modal-button.confirm:hover { background-color: #dc2626; }
+.modal-button.confirm.save { background-color: #16a34a; }
+.modal-button.confirm.save:hover { background-color: #15803d; }
+@keyframes fadeInModal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* --- GRUPO DE FORMULÁRIO (AQUI ESTÁ A CORREÇÃO PRINCIPAL) --- */
 .modal-form-group { margin-bottom: 20px; }
 .modal-form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: #334155; }
+
+/* * CORREÇÃO PRINCIPAL: 
+ * Adicionado '.modal-form-group select' à regra.
+ * Agora, inputs, máscaras E dropdowns terão 100% de largura.
+*/
 .modal-form-group input, 
+.modal-form-group select,
 .modal-form-group .IMaskInput {
-    width: 100%; padding: 10px; border-radius: 6px;
-    border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box;
+    width: 100%; 
+    padding: 10px; 
+    border-radius: 6px;
+    border: 1px solid #cbd5e1; 
+    font-size: 1rem; 
+    box-sizing: border-box;
+    background-color: #fff; /* Garante fundo branco no select */
+    color: #334155; /* Garante cor do texto */
 }
+
 .modal-error-message { color: #ef4444; text-align: center; margin-top: 15px; }
 
+
+/* --- ESTILOS DO MODAL DE PAGAMENTO (Mantidos) --- */
 .pagamento-modal-content { text-align: left; min-width: 550px; }
 .pagamento-total {
     padding: 15px; background-color: #f1f5f9; border-radius: 8px; display: flex;
@@ -103,3 +191,56 @@
 .add-pagamento-btn { background-color: #16a34a; color: white; font-weight: bold; border: none; height: 42px; width: 42px; min-width: 42px; border-radius: 6px; cursor: pointer; font-size: 1.8rem; line-height: 1; transition: background-color 0.2s; }
 .add-pagamento-btn:hover { background-color: #15803d; }
 .pagamento-troco { padding-top: 15px; margin-top: 15px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 600; }
+
+/* --- ADIÇÕES PARA O FORMULÁRIO DE CLIENTE (Mantidas e Corretas) --- */
+.modal-form-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+/* Regra base: todos os grupos dividem o espaço */
+.modal-form-row .modal-form-group {
+    flex: 1;
+}
+
+/* Exceção: o grupo da cidade pega 2x o espaço */
+.modal-form-row .form-group-cidade {
+    flex: 2; 
+}
+.modal-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 20px 0;
+}
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 8px;
+}
+.input-with-button input {
+    flex-grow: 1; 
+}
+.modal-button-cep {
+    flex-shrink: 0; 
+    padding: 0 16px;
+    font-size: 0.9rem;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.modal-button-cep:hover {
+    background-color: #e2e8f0;
+}
+.modal-button-cep:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
