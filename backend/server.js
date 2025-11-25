@@ -16,6 +16,8 @@ const clienteRoutes = require('./src/api/clientes');
 const relatoriosRoutes = require('./src/api/relatorios'); 
 
 const ordensServicos = require('./src/api/ordensServicos');
+const movimentacoesRoutes = require('./src/api/movimentacoes');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -33,6 +35,7 @@ app.use('/api/tipos-servico', ServicoRoutes);
 app.use('/api/servicos', servicos);
 app.use('/api/categorias', categorias);
 app.use('/api/ordens-servico', ordensServicos);
+app.use('/api/movimentacoes', movimentacoesRoutes);
 
 
 pool.query('SELECT NOW()')
