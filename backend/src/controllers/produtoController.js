@@ -83,12 +83,43 @@ exports.createProduto = async (req, res) => {
             [nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imageUrl]
         );
 
-        res.status(201).json(novoProduto.rows[0]);
+        const produto = novoProduto.rows[0];
+        console.log('✅ Produto criado:', produto.id_produto, produto.nome);
+
+        const quantidadeInicial = produto.quantidade_estoque || 0;
+
+        if (quantidadeInicial > 0) {
+            try {
+                const idUsuarioResponsavel = null; 
+
+                const mov = await pool.query(
+                    `INSERT INTO movimentacoes_estoque 
+                        (id_produto, tipo_movimentacao, quantidade, id_usuario_responsavel, observacao)
+                     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+                    [
+                        produto.id_produto,
+                        'entrada',
+                        quantidadeInicial,
+                        idUsuarioResponsavel,
+                        'Cadastro inicial do produto'
+                    ]
+                );
+
+                console.log('✅ Movimentação criada:', mov.rows[0].id_movimentacao);
+            } catch (errMov) {
+                console.error('❌ Erro ao registrar movimentação de estoque:', errMov);
+            }
+        } else {
+            console.log('ℹ️ Produto criado com quantidade 0, não gera movimentação.');
+        }
+
+        res.status(201).json(produto);
     } catch (error) {
         console.error("Erro ao criar produto:", error);
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });
     }
 };
+
 
 exports.updateStatusProduto = async (req, res) => {
     try {
