@@ -229,11 +229,9 @@ exports.finalizarVenda = async (req, res) => {
                 'UPDATE produtos SET quantidade_estoque = quantidade_estoque - $1 WHERE id_produto = $2 RETURNING quantidade_estoque',
                 [item.quantidade, item.id_produto]
             );
-
             if (estoqueResult.rows.length === 0 || estoqueResult.rows[0].quantidade_estoque < 0) {
                 throw new Error(`Estoque insuficiente para o produto ID ${item.id_produto}`);
             }
-
             await client.query(
                 'INSERT INTO movimentacoes_estoque (id_produto, tipo_movimentacao, quantidade, id_item_venda, id_usuario_responsavel) VALUES ($1, $2, $3, $4, $5)',
                 [item.id_produto, 'saida', item.quantidade, item.id_item_venda, id_usuario]
@@ -245,25 +243,38 @@ exports.finalizarVenda = async (req, res) => {
             [valor_final, desconto, id_venda]
         );
 
-       for (const pag of pagamentos) {
+        for (const pag of pagamentos) {
             const totalParcelas = pag.parcelas || 1;
             const valorParcela = pag.valor / totalParcelas;
             
+            const isPago = pag.forma === 'Dinheiro' || pag.forma === 'Débito' || pag.forma === 'PIX';
+            const statusInicial = isPago ? 'pago' : 'pendente';
+            const idContaBancaria = pag.id_conta_bancaria || 1; // Ajuste para seu ID de Caixa Padrão
+            
+            let idFormaPagamento = pag.id_forma_pagamento;
+            if (!idFormaPagamento) {
+                const formaResult = await client.query("SELECT id_forma_pagamento FROM formas_pagamento WHERE nome ILIKE $1", [pag.forma.trim()]);
+                if (formaResult.rows.length > 0) idFormaPagamento = formaResult.rows[0].id_forma_pagamento;
+                else throw new Error(`Forma de pagamento '${pag.forma}' não encontrada.`);
+            }
+
             for (let i = 1; i <= totalParcelas; i++) {
                 const dataVencimento = new Date();
-
-                if (totalParcelas > 1) {
-                    dataVencimento.setMonth(dataVencimento.getMonth() + i);
-                }
+                if (totalParcelas > 1) dataVencimento.setMonth(dataVencimento.getMonth() + i);
                 
-                const statusInicial = pag.forma === 'Cartão de Crédito' ? 'pendente' : 'pago';
-
-                await client.query(
-                    `INSERT INTO contas_a_receber 
-                        (id_venda, id_cliente, numero_parcela, total_parcelas, valor_parcela, data_vencimento, status)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                    [id_venda, id_cliente, i, totalParcelas, valorParcela, dataVencimento, statusInicial]
+                const contaResult = await client.query(
+                    `INSERT INTO contas_a_receber (id_venda, id_cliente, numero_parcela, total_parcelas, valor_parcela, valor_recebido, data_vencimento, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_conta_receber`,
+                    [id_venda, id_cliente, i, totalParcelas, valorParcela, isPago ? valorParcela : 0, dataVencimento, statusInicial]
                 );
+
+                const idContaReceber = contaResult.rows[0].id_conta_receber;
+
+                if (statusInicial === 'pago') {
+                    await client.query(
+                        `INSERT INTO recebimento_venda (id_conta_receber, id_conta_bancaria, id_forma_pagamento, valor_recebido, data_recebimento) VALUES ($1, $2, $3, $4, NOW())`,
+                        [idContaReceber, idContaBancaria, idFormaPagamento, valorParcela]
+                    );
+                }
             }
         }
 

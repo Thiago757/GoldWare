@@ -10,6 +10,7 @@
     padding: 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    flex-shrink: 0; /* ISSO IMPEDE QUE ELA SEJA ESMAGADA */
 }
 
 html, body {

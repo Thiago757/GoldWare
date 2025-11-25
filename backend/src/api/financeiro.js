@@ -3,7 +3,9 @@ const router = express.Router();
 const financeiroController = require('../controllers/financeiroController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-router.get('/', authMiddleware.verifyToken, financeiroController.listarFormasPagamento);
-router.post('/', authMiddleware.verifyToken, financeiroController.criarFormaPagamento);
+router.use(authMiddleware.verifyToken);
+
+// Rota do Extrato
+router.get('/extrato', financeiroController.listarExtrato);
 
 module.exports = router;

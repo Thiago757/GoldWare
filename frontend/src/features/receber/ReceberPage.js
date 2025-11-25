@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
-import { parseISO, format } from 'date-fns'; // Importar 'parseISO' e 'format'
-import { ptBR } from 'date-fns/locale'; // Importar locale ptBR
+import { parseISO, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
-import './ReceberPage.css'; // Você precisará adicionar os estilos da tabela (ver abaixo)
+import './ReceberPage.css';
 
-// --- NOVO: Funções para formatar os dados na tabela ---
+// Import do Modal
+import BaixarTituloModal from '../../components/common/BaixarTituloModal'; 
+
+// --- Funções Helper ---
 function formatarData(dataISO) {
     if (!dataISO) return '--';
     try {
@@ -28,108 +31,105 @@ function formatarMoeda(valor) {
         currency: 'BRL'
     });
 }
-// --- FIM DA ADIÇÃO ---
-
 
 function ReceberPage() {
     const [receber, setReceber] = useState([]);
     const [loading, setLoading] = useState(true);
     const { token } = useContext(AuthContext);
+    
+    // Filtros de Data
     const [filtroPeriodoEmissao, setFiltroPeriodoEmissao] = useState('todos');
     const [filtrosEmissao, setFiltrosEmissao] = useState({ startDate: null, endDate: null });
     const [filtroPeriodoVencimento, setFiltroPeriodoVencimento] = useState('todos');
     const [filtrosVencimento, setFiltrosVencimento] = useState({ startDate: null, endDate: null });
-    const [clientes, setClientes] = useState([]);
     
+    // Listas e Estados do Modal
+    const [clientes, setClientes] = useState([]);
+    const [isBaixaModalOpen, setIsBaixaModalOpen] = useState(false);
+    const [tituloSelecionado, setTituloSelecionado] = useState(null);
 
-    // 2. Adicionado 'clienteId' ao estado de filtros
+    // Filtros Principais
     const [filtros, setFiltros] = useState({
-        status: '', // <-- Perfeito. '' significa "Todos"
+        status: '', 
         clienteId: ''
     });
 
-    // ... (Seus useEffects de data permanecem iguais) ...
-    // UseEffect para Emissão
+    // --- Funções do Modal e Ações ---
+    const handleAbrirModalBaixa = (titulo) => {
+        setTituloSelecionado(titulo);
+        setIsBaixaModalOpen(true);
+    };
+
+    const handleFecharModalBaixa = () => {
+        setTituloSelecionado(null);
+        setIsBaixaModalOpen(false);
+    };
+
+    const handleTituloBaixado = () => {
+        handleFecharModalBaixa();
+        fetchReceber(); 
+    };
+
+    const handleReabrirTitulo = async (titulo) => {
+        if (!window.confirm(`Deseja realmente reabrir o título de ${titulo.nome_cliente}? O valor recebido será estornado.`)) {
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:3001/api/recebimentos/estornar/${titulo.id_conta_receber}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const erro = await response.json();
+                alert(erro.message || 'Erro ao reabrir título');
+                return;
+            }
+            alert('Título reaberto com sucesso!');
+            fetchReceber();
+        } catch (error) {
+            console.error("Erro:", error);
+            alert('Erro ao conectar com o servidor.');
+        }
+    };
+
+    // --- UseEffects de Datas (Emissão) ---
     useEffect(() => {
         const hoje = new Date();
         let startDate = null;
         let endDate = null;
         switch (filtroPeriodoEmissao) {
-            case 'hoje':
-                startDate = hoje;
-                endDate = hoje;
-                break;
-            case 'semana_atual':
-                startDate = startOfWeek(hoje, { weekStartsOn: 0 });
-                endDate = endOfWeek(hoje, { weekStartsOn: 0 });
-                break;
-            case 'mes_atual':
-                startDate = startOfMonth(hoje);
-                endDate = endOfMonth(hoje);
-                break;
-            case 'mes_passado':
-                const mesPassado = subMonths(hoje, 1);
-                startDate = startOfMonth(mesPassado);
-                endDate = endOfMonth(mesPassado);
-                break;
-            case 'ano_atual':
-                startDate = startOfYear(hoje);
-                endDate = endOfYear(hoje);
-                break;
-            case 'ano_passado':
-                const anoPassado = subYears(hoje, 1);
-                startDate = startOfYear(anoPassado);
-                endDate = endOfYear(anoPassado);
-                break;
-            default:
-                break;
+            case 'hoje': startDate = hoje; endDate = hoje; break;
+            case 'semana_atual': startDate = startOfWeek(hoje, { weekStartsOn: 0 }); endDate = endOfWeek(hoje, { weekStartsOn: 0 }); break;
+            case 'mes_atual': startDate = startOfMonth(hoje); endDate = endOfMonth(hoje); break;
+            case 'mes_passado': const mesPassado = subMonths(hoje, 1); startDate = startOfMonth(mesPassado); endDate = endOfMonth(mesPassado); break;
+            case 'ano_atual': startDate = startOfYear(hoje); endDate = endOfYear(hoje); break;
+            case 'ano_passado': const anoPassado = subYears(hoje, 1); startDate = startOfYear(anoPassado); endDate = endOfYear(anoPassado); break;
+            default: break;
         }
         setFiltrosEmissao({ startDate, endDate });
     }, [filtroPeriodoEmissao]);
 
-    // UseEffect para Vencimento
+    // --- UseEffects de Datas (Vencimento) ---
     useEffect(() => {
         const hoje = new Date();
         let startDate = null;
         let endDate = null;
         switch (filtroPeriodoVencimento) {
-            case 'hoje':
-                startDate = hoje;
-                endDate = hoje;
-                break;
-            case 'semana_atual':
-                startDate = startOfWeek(hoje, { weekStartsOn: 0 });
-                endDate = endOfWeek(hoje, { weekStartsOn: 0 });
-                break;
-            case 'mes_atual':
-                startDate = startOfMonth(hoje);
-                endDate = endOfMonth(hoje);
-                break;
-            case 'mes_passado':
-                const mesPassado = subMonths(hoje, 1);
-                startDate = startOfMonth(mesPassado);
-                endDate = endOfMonth(mesPassado);
-                break;
-            case 'ano_atual':
-                startDate = startOfYear(hoje);
-                endDate = endOfYear(hoje);
-                break;
-            case 'ano_passado':
-                const anoPassado = subYears(hoje, 1);
-                startDate = startOfYear(anoPassado);
-                endDate = endOfYear(anoPassado);
-                break;
-            default:
-                break;
+            case 'hoje': startDate = hoje; endDate = hoje; break;
+            case 'semana_atual': startDate = startOfWeek(hoje, { weekStartsOn: 0 }); endDate = endOfWeek(hoje, { weekStartsOn: 0 }); break;
+            case 'mes_atual': startDate = startOfMonth(hoje); endDate = endOfMonth(hoje); break;
+            case 'mes_passado': const mesPassado = subMonths(hoje, 1); startDate = startOfMonth(mesPassado); endDate = endOfMonth(mesPassado); break;
+            case 'ano_atual': startDate = startOfYear(hoje); endDate = endOfYear(hoje); break;
+            case 'ano_passado': const anoPassado = subYears(hoje, 1); startDate = startOfYear(anoPassado); endDate = endOfYear(anoPassado); break;
+            default: break;
         }
         setFiltrosVencimento({ startDate, endDate });
     }, [filtroPeriodoVencimento]);
 
-    // 3. UseEffect para buscar a lista de clientes (sem mudanças)
+    // --- Buscar Clientes ---
     useEffect(() => {
         const fetchClientes = async () => {
             try {
-                // Rota que você precisa criar no backend
                 const response = await fetch(`http://localhost:3001/api/clientes`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -140,45 +140,26 @@ function ReceberPage() {
                 console.error("Erro ao buscar clientes:", error);
             }
         };
-
-        if (token) {
-            fetchClientes();
-        }
+        if (token) fetchClientes();
     }, [token]);
 
-
-    // 4. Lógica de busca (quase igual, só adicionei um console.log para debug)
+    // --- Função Principal de Busca ---
     const fetchReceber = async () => {
-        console.log("Buscando dados com filtros:", filtros); // Ajuda a ver o que está sendo enviado
+        console.log("Buscando dados...", filtros);
         setLoading(true);
         try {
             const params = new URLSearchParams();
-
-            // Se 'filtros.status' for '', nada é adicionado (correto)
             if (filtros.status) params.append('status', filtros.status);
             if (filtros.clienteId) params.append('clienteId', filtros.clienteId);
+            if (filtrosEmissao.startDate) params.append('emissaoStartDate', filtrosEmissao.startDate.toISOString());
+            if (filtrosEmissao.endDate) params.append('emissaoEndDate', filtrosEmissao.endDate.toISOString());
+            if (filtrosVencimento.startDate) params.append('vencimentoStartDate', filtrosVencimento.startDate.toISOString());
+            if (filtrosVencimento.endDate) params.append('vencimentoEndDate', filtrosVencimento.endDate.toISOString());
 
-            if (filtrosEmissao.startDate) {
-                params.append('emissaoStartDate', filtrosEmissao.startDate.toISOString());
-            }
-            if (filtrosEmissao.endDate) {
-                params.append('emissaoEndDate', filtrosEmissao.endDate.toISOString());
-            }
-            if (filtrosVencimento.startDate) {
-                params.append('vencimentoStartDate', filtrosVencimento.startDate.toISOString());
-            }
-            if (filtrosVencimento.endDate) {
-                params.append('vencimentoEndDate', filtrosVencimento.endDate.toISOString());
-            }
-
-            // --- NOTA IMPORTANTE ---
-            // Certifique-se que sua API em 'http://localhost:3001/api/receber'
-            // faz um JOIN com a tabela 'clientes' para pegar o 'nome' do cliente.
-            // O código da tabela abaixo assume que o item retornado tem 'item.nome_cliente'.
-            
             const response = await fetch(`http://localhost:3001/api/receber?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            
             if (!response.ok) throw new Error('Falha ao buscar contas a receber');
             const data = await response.json();
             setReceber(data);
@@ -189,39 +170,32 @@ function ReceberPage() {
         }
     };
 
-    // --- NOVO (PASSO 1): CHAMA A BUSCA NA INICIALIZAÇÃO ---
-    // Este hook chama o fetchReceber() assim que o token estiver disponível.
-    // É importante que este hook venha DEPOIS da definição de fetchReceber
     useEffect(() => {
-        if (token) {
-            fetchReceber();
-        }
+        if (token) fetchReceber();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token]); // Roda a busca inicial assim que o token for carregado
+    }, [token]);
 
 
+    // --- RENDERIZAÇÃO (ESTRUTURA CORRIGIDA) ---
     return (
         <>
+            {/* AQUI ESTÁ A MUDANÇA: A div 'receber-list-container' agora envolve TUDO */}
             <div className="receber-list-container">
+                
+                {/* Cabeçalho */}
                 <div className="receber-list-header">
                     <h1>Contas a receber</h1>
                     <button onClick={() => (true)} className="novo-receber-btn">+ Novo Receber</button>
                 </div>
 
+                {/* Filtros */}
                 <div className="filtros-container"> 
                     <div className="filtro-status">
                         <label>Status: </label>
-                        <select
-                            value={filtros.status} // Valor inicial é '', que bate com "Todos"
-                            onChange={e => setFiltros({ ...filtros, status: e.target.value })}
-                            className="filtro-input"
-                        >
+                        <select value={filtros.status} onChange={e => setFiltros({ ...filtros, status: e.target.value })} className="filtro-input">
                             <option value="">Todos</option>
-                            {/* Ajuste os valores para baterem com seu backend
-                                (Ex: 'pendente', 'pago', 'cancelado')
-                                Vou manter os que você tinha:
-                            */}
-                            <option value="aberto">Aberto</option>
+                            <option value="aberto">Em Aberto</option>
+                            <option value="pendente">Pendente</option>
                             <option value="pago">Pago</option> 
                             <option value="cancelado">Cancelado</option>
                             <option value="parcial">Parcial</option>
@@ -229,14 +203,9 @@ function ReceberPage() {
                         </select>
                     </div>
 
-                    {/* Restante dos filtros (sem mudança) */}
                     <div className="filtro-emissao">
                         <label>Período de Emissão: </label>
-                        <select
-                            className="filtro-input"
-                            value={filtroPeriodoEmissao}
-                            onChange={e => setFiltroPeriodoEmissao(e.target.value)}
-                        >
+                        <select className="filtro-input" value={filtroPeriodoEmissao} onChange={e => setFiltroPeriodoEmissao(e.target.value)}>
                             <option value="todos">Todos</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana_atual">Esta Semana</option>
@@ -249,35 +218,16 @@ function ReceberPage() {
                     </div>
                     <div>
                         <label>Início Emissão: </label>
-                        <DatePicker
-                            selected={filtrosEmissao.startDate}
-                            onChange={date => setFiltrosEmissao({ ...filtrosEmissao, startDate: date })}
-                            className="filtro-input"
-                            placeholderText="DD/MM/AAAA"
-                            locale="pt-BR"
-                            dateFormat="dd/MM/yyyy"
-                            isClearable
-                        />
+                        <DatePicker selected={filtrosEmissao.startDate} onChange={date => setFiltrosEmissao({ ...filtrosEmissao, startDate: date })} className="filtro-input" placeholderText="DD/MM/AAAA" locale={ptBR} dateFormat="dd/MM/yyyy" isClearable />
                     </div>
                     <div>
                         <label>Fim Emissão: </label>
-                        <DatePicker
-                            selected={filtrosEmissao.endDate}
-                            onChange={date => setFiltrosEmissao({ ...filtrosEmissao, endDate: date })}
-                            className="filtro-input"
-                            placeholderText="DD/MM/AAAA"
-                            locale="pt-BR"
-                            dateFormat="dd/MM/yyyy"
-                            isClearable
-                        />
+                        <DatePicker selected={filtrosEmissao.endDate} onChange={date => setFiltrosEmissao({ ...filtrosEmissao, endDate: date })} className="filtro-input" placeholderText="DD/MM/AAAA" locale={ptBR} dateFormat="dd/MM/yyyy" isClearable />
                     </div>
+
                     <div className="filtro-vencimento">
                         <label>Período de Vencimento: </label>
-                        <select
-                            className="filtro-input"
-                            value={filtroPeriodoVencimento}
-                            onChange={e => setFiltroPeriodoVencimento(e.target.value)}
-                        >
+                        <select className="filtro-input" value={filtroPeriodoVencimento} onChange={e => setFiltroPeriodoVencimento(e.target.value)}>
                             <option value="todos">Todos</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana_atual">Esta Semana</option>
@@ -290,104 +240,93 @@ function ReceberPage() {
                     </div>
                     <div>
                         <label>Início Vencimento: </label>
-                        <DatePicker
-                            selected={filtrosVencimento.startDate}
-                            onChange={date => setFiltrosVencimento({ ...filtrosVencimento, startDate: date })}
-                            className="filtro-input"
-                            placeholderText="DD/MM/AAAA"
-                            locale="pt-BR"
-                            dateFormat="dd/MM/yyyy"
-                            isClearable
-                        />
+                        <DatePicker selected={filtrosVencimento.startDate} onChange={date => setFiltrosVencimento({ ...filtrosVencimento, startDate: date })} className="filtro-input" placeholderText="DD/MM/AAAA" locale={ptBR} dateFormat="dd/MM/yyyy" isClearable />
                     </div>
                     <div>
                         <label>Fim Vencimento: </label>
-                        <DatePicker
-                            selected={filtrosVencimento.endDate}
-                            onChange={date => setFiltrosVencimento({ ...filtrosVencimento, endDate: date })}
-                            className="filtro-input"
-                            placeholderText="DD/MM/AAAA"
-                            locale="pt-BR"
-                            dateFormat="dd/MM/yyyy"
-                             isClearable
-                        />
+                        <DatePicker selected={filtrosVencimento.endDate} onChange={date => setFiltrosVencimento({ ...filtrosVencimento, endDate: date })} className="filtro-input" placeholderText="DD/MM/AAAA" locale={ptBR} dateFormat="dd/MM/yyyy" isClearable />
                     </div>
 
                     <div className="filtro-cliente">
                         <label>Cliente: </label>
-                        <select
-                            value={filtros.clienteId}
-                            onChange={e => setFiltros({ ...filtros, clienteId: e.target.value })}
-                            className="filtro-map-clientes"
-                        >
+                        <select value={filtros.clienteId} onChange={e => setFiltros({ ...filtros, clienteId: e.target.value })} className="filtro-map-clientes">
                             <option value="">Todos</option>
-                            {/* --- CORREÇÃO AQUI --- 
-                                Assumindo que seu /api/clientes retorna { id_cliente, nome }
-                            */}
                             {clientes.map(cliente => (
-                                <option key={cliente.id_cliente} value={cliente.id_cliente}>
-                                    {cliente.nome} 
-                                </option>
+                                <option key={cliente.id_cliente} value={cliente.id_cliente}>{cliente.nome}</option>
                             ))}
                         </select>
                     </div>
                     
-                    {/* Botão de Filtrar agora SÓ filtra, não carrega mais */}
                     <button onClick={fetchReceber} className="filtrar-btn">Filtrar</button>
-                    <button onClick={() => (true)} className="baixar-receber-btn">Baixar título</button>
                 </div>
-            </div> 
-            
-            {/* --- NOVO (PASSO 2): ÁREA DE EXIBIÇÃO DOS DADOS --- */}
-            <div className="receber-table-container">
-                {loading ? (
-                    <div className="loading-container">
-                        <p>Carregando títulos...</p>
-                        {/* Você pode adicionar um componente de spinner aqui */}
-                    </div>
-                ) : receber.length === 0 ? (
-                    <div className="empty-container">
-                        <p>Nenhum título encontrado para os filtros selecionados.</p>
-                    </div>
-                ) : (
-                    <table className="receber-table">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Vencimento</th>
-                                <th>Valor da Parcela</th>
-                                <th>Valor Recebido</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {/* Assumindo que sua API /api/receber retorna uma lista de objetos assim:
-                                { id_conta_receber: 1, nome_cliente: 'Elias Maciel', data_vencimento: '...', 
-                                  valor_parcela: 150.00, valor_recebido: 0, status: 'pendente' }
-                            */}
-                            {receber.map(item => (
-                                <tr key={item.id_conta_receber}>
-                                    <td>{item.nome_cliente || 'Cliente não informado'}</td>
-                                    <td>{formatarData(item.data_vencimento)}</td>
-                                    <td>{formatarMoeda(item.valor_parcela)}</td>
-                                    <td>{formatarMoeda(item.valor_recebido)}</td>
-                                    <td>
-                                        {/* Adiciona uma tag de status baseada no status do backend */}
-                                        <span className={`status-tag status-${item.status}`}>
-                                            {item.status}
-                                        </span>
-                                    </td>
-                                    <td className="coluna-acoes">
-                                        {/* Aqui você pode adicionar botões de ação */}
-                                        <button className="acao-btn">Baixar</button>
-                                    </td>
+
+                {/* --- TABELA DE DADOS (AGORA DENTRO DO CONTAINER) --- */}
+                <div className="receber-table-container">
+                    {loading ? (
+                        <div className="loading-container"><p>Carregando títulos...</p></div>
+                    ) : receber.length === 0 ? (
+                        <div className="empty-container"><p>Nenhum título encontrado.</p></div>
+                    ) : (
+                        <table className="receber-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor da Parcela</th>
+                                    <th>Valor Recebido</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+                            </thead>
+                            <tbody>
+                                {receber.map(item => (
+                                    <tr key={item.id_conta_receber}>
+                                        <td>{item.nome_cliente || 'Cliente não informado'}</td>
+                                        <td>{formatarData(item.data_vencimento)}</td>
+                                        <td>{formatarMoeda(item.valor_parcela)}</td>
+                                        <td>{formatarMoeda(item.valor_recebido)}</td>
+                                        <td>
+                                            <span className={`status-tag status-${item.status}`}>
+                                                {item.status}
+                                            </span>
+                                        </td>
+                                        <td className="coluna-acoes">
+                                            {item.status === 'pago' ? (
+                                                <button 
+                                                    onClick={() => handleReabrirTitulo(item)} 
+                                                    className="reabrir-receber-btn"
+                                                    title="Estornar recebimento"
+                                                >
+                                                    Reabrir
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => handleAbrirModalBaixa(item)} 
+                                                    className="baixar-receber-btn"
+                                                    disabled={item.status === 'cancelado'}
+                                                >
+                                                    Baixar
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            {/* O container principal fecha AQUI agora */}
+            </div> 
+
+            {/* Modais ficam fora do container */}
+            {isBaixaModalOpen && (
+                <BaixarTituloModal
+                    isOpen={isBaixaModalOpen}
+                    onClose={handleFecharModalBaixa}
+                    onBaixaEfetuada={handleTituloBaixado}
+                    titulo={tituloSelecionado}
+                />
+            )}
         </>
     );
 }
