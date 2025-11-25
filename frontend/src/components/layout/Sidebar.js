@@ -10,6 +10,7 @@ import { IoDocumentTextOutline } from 'react-icons/io5';
 import { HiOutlineCash } from "react-icons/hi";
 import { FaRegCreditCard } from "react-icons/fa";
 import { FiMenu, FiX } from "react-icons/fi";
+import { FaFileInvoiceDollar } from 'react-icons/fa'; // Adicione FaFileInvoiceDollar
 
 const getInitials = (name = '') => {
     const names = name.trim().split(' ').filter(Boolean);
@@ -132,6 +133,9 @@ function Sidebar() {
                         </li>
                         <li className={location.pathname === '/pagar' ? 'active' : ''}>
                             <Link to="/pagar"><FaRegCreditCard /> Pagar</Link>
+                        </li>
+                        <li className={location.pathname === '/extrato' ? 'active' : ''}>
+                            <Link to="/extrato"><FaFileInvoiceDollar /> Extrato</Link>
                         </li>
                         <li className={location.pathname === '/relatorios' ? 'active' : ''}>
                             <Link to="/relatorios"><IoDocumentTextOutline /> Relatórios</Link>
