@@ -4,6 +4,11 @@ INSERT INTO estados (nome, sigla) VALUES
 ('Rio Grande do Sul', 'RS'),
 ('Paraná', 'PR');
 
+
+INSERT INTO configuracoes_loja (nome_loja, cnpj, email_contato) 
+VALUES ('Gold Ware System', '00.000.000/0001-00', 'admin@goldware.com');
+
+
 INSERT INTO cidades (nome, id_estado, uf) VALUES
 ('Criciúma', 1, 'SC'),
 ('Florianópolis', 1, 'SC'),
