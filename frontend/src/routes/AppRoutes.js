@@ -24,6 +24,8 @@ import OSDetailPage from '../features/servicos/OSDetailPage';
 import ReceberPage from '../features/receber/ReceberPage';
 import PagarPage from '../features/pagar/PagarPage';
 import ExtratoPage from '../features/financeiro/ExtratoPage';
+import MinhaLojaPage from '../features/settings/MinhaLojaPage';
+import UsuariosPage from '../features/settings/UsuariosPage';
 
 function AppRoutes() {
     return (
@@ -31,6 +33,7 @@ function AppRoutes() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/esqueceu-senha" element={<ForgotPasswordPage />} />
             <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
+            
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/vendas" element={<ProtectedRoute><VendasListPage /></ProtectedRoute>} />
             <Route path="/vendas/nova" element={<ProtectedRoute><PDVPage /></ProtectedRoute>} />
@@ -45,15 +48,19 @@ function AppRoutes() {
             <Route path="/pagar" element={<ProtectedRoute><PagarPage /></ProtectedRoute>} />
             <Route path="/extrato" element={<ProtectedRoute><ExtratoPage /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />            
+            
             <Route path="/configuracoes" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}>
-                <Route index element={<h2>Selecione uma categoria de configuração</h2>} />
+                <Route index element={<MinhaLojaPage />} />
+                <Route path="minha-loja" element={<MinhaLojaPage />} />
+                <Route path="usuarios" element={<UsuariosPage />} />
                 <Route path="servicos/tipos" element={<TiposServicoSettingsPage />} />
                 <Route path="servicos/catalogo" element={<CatalogoServicosPage />} />
                 <Route path="produtos/categorias" element={<CategoriaProdutosPage />} />
             </Route>
+            
             <Route path="/" element={<LoginPage />} />
         </Routes>
     );
 }
 
-export default AppRoutes; 
+export default AppRoutes;

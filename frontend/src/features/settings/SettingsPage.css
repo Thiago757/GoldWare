@@ -1,47 +1,237 @@
+/* src/features/settings/SettingsPage.css */
+
 .settings-page {
     display: flex;
     height: 100%;
+    min-height: calc(100vh - 64px);
+    background-color: #f8fafc;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .settings-sidebar {
-    width: 240px;
-    background-color: #f8fafc; /* Um cinza bem claro */
-    padding: 20px;
+    width: 250px;
+    background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
 }
 
 .settings-sidebar h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .settings-sidebar nav {
     display: flex;
     flex-direction: column;
+    gap: 4px;
 }
 
 .settings-sidebar nav a {
-    padding: 12px 16px;
-    color: #475569;
+    padding: 10px 14px;
     text-decoration: none;
-    border-radius: 6px;
-    margin-bottom: 8px;
+    color: #475569;
     font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .settings-sidebar nav a:hover {
-    background-color: #e2e8f0;
+    background-color: #f1f5f9;
+    color: #0f172a;
 }
 
-/* Estilo que o NavLink aplica automaticamente ao link ativo */
 .settings-sidebar nav a.active {
-    background-color: #4f46e5; /* Roxo/Azul */
-    color: white;
+    background-color: #e0e7ff;
+    color: #4338ca;
 }
 
 .settings-content {
-    flex-grow: 1;
-    padding: 30px;
-    overflow-y: auto; /* Adiciona scroll se o conteúdo for grande */
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+/* Conteúdo Full Width */
+.config-content {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+}
+
+/* Formulários */
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 100%;
+}
+
+.form-row {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.half-width {
+    flex: 1;
+}
+
+.config-form label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.config-form input,
+.config-form select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+
+.config-form input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.config-form input[disabled] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+}
+
+/* Botões */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-primary, .btn-success, .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn-primary { background-color: #4f46e5; color: white; }
+.btn-primary:hover { background-color: #4338ca; }
+
+.btn-success { background-color: #10b981; color: white; }
+.btn-success:hover { background-color: #059669; }
+
+.btn-secondary { background-color: #e2e8f0; color: #475569; }
+.btn-secondary:hover { background-color: #cbd5e1; color: #1e293b; }
+
+/* Tabela */
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.user-table th {
+    background-color: #f8fafc;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.user-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.user-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Botões de Ação (Editar/Excluir) */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn-action.edit {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+.btn-action.edit:hover {
+    background-color: #c7d2fe;
+}
+
+.btn-action.delete {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+.btn-action.delete:hover {
+    background-color: #fecaca;
+}
+
+/* Mensagens */
+.error-message {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.success-message {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #16a34a;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 24px;
 }

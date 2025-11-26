@@ -35,9 +35,13 @@ CREATE TABLE contas_bancarias (
     ativo CHAR(1) DEFAULT 'S' CHECK (ativo IN ('S', 'N'))
 );
 
-CREATE TABLE tipos_servico (
-    id_tipo_servico SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL UNIQUE
+CREATE TABLE configuracoes_loja (
+    id SERIAL PRIMARY KEY,
+    nome_loja VARCHAR(255),
+    cnpj VARCHAR(20),
+    endereco TEXT,
+    telefone VARCHAR(20),
+    email_contato VARCHAR(255)
 );
 
 -- ETAPA 2: TABELAS DE ENTIDADES (Dependem das tabelas de apoio)
