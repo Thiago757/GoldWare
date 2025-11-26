@@ -9,10 +9,10 @@ exports.listarMovimentacoes = async (req, res) => {
                 m.tipo_movimentacao,
                 m.quantidade,
                 m.observacao,
-
                 p.nome AS produto,
+                p.preco_venda,
+                p.custo,
                 u.nome AS responsavel,
-
                 COALESCE(m.id_item_venda, NULL) AS id_item_venda,
                 COALESCE(m.id_item_compra, NULL) AS id_item_compra
 

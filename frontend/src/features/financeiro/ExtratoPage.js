@@ -21,48 +21,37 @@ function ExtratoPage() {
     const [movimentacoes, setMovimentacoes] = useState([]);
     const [contas, setContas] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    // Estados dos Modais
     const [isGerenciarContasOpen, setIsGerenciarContasOpen] = useState(false);
     const [isGerenciarFormasOpen, setIsGerenciarFormasOpen] = useState(false);
-
-    // Filtros
     const [startDate, setStartDate] = useState(startOfMonth(new Date()));
     const [endDate, setEndDate] = useState(endOfMonth(new Date()));
     const [contaId, setContaId] = useState('');
-
-    // Estado de Ordenação (NOVO)
-    // Padrão: ordenar por data de forma decrescente (mais recente primeiro)
     const [sortConfig, setSortConfig] = useState({ key: 'data_movimentacao', direction: 'desc' });
-
-    // Totais
     const [totais, setTotais] = useState({ entradas: 0, saidas: 0, saldo: 0 });
 
-    // --- Lógica de Ordenação (NOVO) ---
     const requestSort = (key) => {
         let direction = 'asc';
-        // Se já estiver ordenado nessa coluna e for 'asc', vira 'desc'
         if (sortConfig.key === key && sortConfig.direction === 'asc') {
             direction = 'desc';
         }
         setSortConfig({ key, direction });
     };
 
-    // Cria uma lista ordenada baseada na lista original 'movimentacoes'
     const sortedMovimentacoes = useMemo(() => {
-        let sortableItems = [...movimentacoes];
+
+        const listaSegura = Array.isArray(movimentacoes) ? movimentacoes : [];
+        let sortableItems = [...listaSegura];
+
         if (sortConfig !== null) {
             sortableItems.sort((a, b) => {
                 let aValue = a[sortConfig.key];
                 let bValue = b[sortConfig.key];
 
-                // Tratamento especial para números (valor)
                 if (sortConfig.key === 'valor') {
                     aValue = Number(aValue);
                     bValue = Number(bValue);
                 }
                 
-                // Tratamento para texto (case insensitive)
                 if (typeof aValue === 'string') {
                     aValue = aValue.toLowerCase();
                     bValue = bValue.toLowerCase();
@@ -80,16 +69,12 @@ function ExtratoPage() {
         return sortableItems;
     }, [movimentacoes, sortConfig]);
 
-    // Função auxiliar para mostrar o ícone correto
     const getSortIcon = (columnName) => {
         if (sortConfig.key !== columnName) return <FaSort style={{opacity: 0.3}} />;
         if (sortConfig.direction === 'asc') return <FaSortUp />;
         return <FaSortDown />;
     };
-    // --- Fim da Lógica de Ordenação ---
 
-
-    // 1. Busca Contas
     const fetchContas = async () => {
         try {
             const res = await fetch('http://localhost:3001/api/contas-bancarias', {
@@ -104,7 +89,7 @@ function ExtratoPage() {
         if (token) fetchContas();
     }, [token]);
 
-    // 2. Busca Extrato
+    
     const fetchExtrato = async () => {
         setLoading(true);
         try {
@@ -139,7 +124,6 @@ function ExtratoPage() {
 
     useEffect(() => {
         if (token) fetchExtrato();
-        // eslint-disable-next-line
     }, [token]); 
 
     const handleCloseGerenciarContas = () => {
@@ -170,8 +154,6 @@ function ExtratoPage() {
                     </button>
                 </div>
             </div>      
-
-            {/* Filtros */}
             <div className="filtros-bar">
                 <div className="filtro-group">
                     <label>Conta Bancária</label>
@@ -194,8 +176,6 @@ function ExtratoPage() {
                 </div>
                 <button onClick={fetchExtrato} className="btn-filtrar">Atualizar</button>
             </div>
-
-            {/* Cards de Resumo */}
             <div className="cards-resumo">
                 <div className="card entrada">
                     <span>Entradas</span>
@@ -211,7 +191,6 @@ function ExtratoPage() {
                 </div>
             </div>
 
-            {/* Tabela com Ordenação */}
             <div className="tabela-wrapper">
                 <table className="tabela-extrato">
                     <thead>
@@ -234,7 +213,6 @@ function ExtratoPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Usamos sortedMovimentacoes ao invés de movimentacoes */}
                         {sortedMovimentacoes.map(mov => (
                             <tr key={mov.id_movimentacao}>
                                 <td>{format(parseISO(mov.data_movimentacao), 'dd/MM/yyyy HH:mm')}</td>

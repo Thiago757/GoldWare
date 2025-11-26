@@ -194,26 +194,70 @@ exports.uploadImage = async (req, res) => {
 };
 
 exports.updateProduto = async (req, res) => {
+    // Usamos 'client' em vez de 'pool' direto para garantir a transação
+    const client = await pool.connect();
+    
     try {
         const { id } = req.params;
+        // Convertemos para Int para garantir cálculos matemáticos corretos
         const { nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria } = req.body;
+        const novoEstoque = parseInt(quantidade_estoque);
 
-        const produtoAtualizado = await pool.query(
+        await client.query('BEGIN'); // Inicia a transação
+
+        // 1. Buscar o estoque ATUAL antes da atualização
+        const produtoAtualQuery = await client.query(
+            'SELECT quantidade_estoque FROM produtos WHERE id_produto = $1',
+            [id]
+        );
+
+        if (produtoAtualQuery.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Produto não encontrado.' });
+        }
+
+        const estoqueAntigo = produtoAtualQuery.rows[0].quantidade_estoque;
+
+        // 2. Atualizar o produto
+        const produtoAtualizado = await client.query(
             `UPDATE produtos SET 
                 nome = $1, descricao = $2, preco_venda = $3, custo = $4, 
                 quantidade_estoque = $5, id_categoria = $6 
              WHERE id_produto = $7 RETURNING *`,
-            [nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, id]
+            [nome, descricao, preco_venda, custo, novoEstoque, id_categoria, id]
         );
 
-        if (produtoAtualizado.rowCount === 0) {
-            return res.status(404).json({ message: 'Produto não encontrado.' });
+        if (novoEstoque !== estoqueAntigo) {
+            const diferenca = novoEstoque - estoqueAntigo;
+            const tipoMovimentacao = diferenca > 0 ? 'entrada' : 'saida';
+            const quantidadeMovimentada = Math.abs(diferenca);
+            const idUsuarioResponsavel = null; 
+
+            await client.query(
+                `INSERT INTO movimentacoes_estoque 
+                    (id_produto, tipo_movimentacao, quantidade, id_usuario_responsavel, observacao)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [
+                    id, 
+                    tipoMovimentacao, 
+                    quantidadeMovimentada, 
+                    idUsuarioResponsavel, 
+                    `Ajuste manual de estoque (Edição): De ${estoqueAntigo} para ${novoEstoque}`
+                ]
+            );
+            
+            console.log(`✅ Movimentação de ${tipoMovimentacao} registrada: ${quantidadeMovimentada} unidades.`);
         }
 
+        await client.query('COMMIT');
         res.status(200).json(produtoAtualizado.rows[0]);
+
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error("Erro ao atualizar produto:", error);
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });
+    } finally {
+        client.release(); 
     }
 };
 
