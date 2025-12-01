@@ -7,20 +7,26 @@ const bwipjs = require('bwip-js');
 
 exports.listarProdutos = async (req, res) => {
     try {
-        const { searchTerm, ativo, codigo_barras } = req.query; 
+        // aceita tanto searchTerm quanto nome (frontend usa "nome")
+        const { searchTerm, nome, ativo, codigo_barras } = req.query; 
+        const termoBusca = searchTerm || nome;
 
         let query = 'SELECT * FROM produtos';
         const params = [];
         const conditions = [];
 
-        if (searchTerm) {
-            if (!isNaN(searchTerm.replace(/[^\d]/g, ""))) {
-                params.push(`%${searchTerm}%`);
-                params.push(`%${searchTerm}%`);
-                conditions.push(`(nome ILIKE $1 OR codigo_barras LIKE $2)`);
+        if (termoBusca) {
+            const termoSemMascara = termoBusca.replace(/[^\d]/g, "");
+            // guardamos o índice do primeiro parâmetro de texto
+            params.push(`%${termoBusca}%`);
+            const idxNome = params.length;
+
+            if (!isNaN(termoSemMascara) && termoSemMascara !== "") {
+                // nome OU código de barras
+                params.push(`%${termoBusca}%`);
+                conditions.push(`(nome ILIKE $${idxNome} OR codigo_barras LIKE $${idxNome + 1})`);
             } else {
-                params.push(`%${searchTerm}%`);
-                conditions.push(`nome ILIKE $1`);
+                conditions.push(`nome ILIKE $${idxNome}`);
             }
         }
 
@@ -49,6 +55,7 @@ exports.listarProdutos = async (req, res) => {
     }
 };
 
+// BUSCA POR CÓDIGO DE BARRAS (PARA LEITOR)
 exports.findByBarcode = async (req, res) => {
     try {
         const { code } = req.params;
@@ -66,10 +73,15 @@ exports.findByBarcode = async (req, res) => {
     }
 };
 
+// CRIAR PRODUTO (ESTOQUE INICIAL VIA MOVIMENTAÇÃO)
 exports.createProduto = async (req, res) => {
+    const client = await pool.connect();
+
     try {
         const { nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria } = req.body;
         
+        const quantidadeInicial = parseInt(quantidade_estoque || 0, 10);
+
         let imageUrl = null;
         if (req.file) {
             imageUrl = `/uploads/${req.file.filename}`;
@@ -77,25 +89,29 @@ exports.createProduto = async (req, res) => {
 
         const codigo_barras = generateEAN13();
 
-        const novoProduto = await pool.query(
-            `INSERT INTO produtos (nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imagem_url) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imageUrl]
+        await client.query('BEGIN');
+
+        // Produto começa com estoque 0 (quem ajusta é a movimentação)
+        const novoProduto = await client.query(
+            `INSERT INTO produtos 
+                (nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria, codigo_barras, imagem_url) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+             RETURNING *`,
+            [nome, descricao, preco_venda, custo, 0, id_categoria, codigo_barras, imageUrl]
         );
 
         const produto = novoProduto.rows[0];
         console.log('✅ Produto criado:', produto.id_produto, produto.nome);
 
-        const quantidadeInicial = produto.quantidade_estoque || 0;
-
         if (quantidadeInicial > 0) {
             try {
-                const idUsuarioResponsavel = null; 
+                const idUsuarioResponsavel = null; // depois pode pegar do token
 
-                const mov = await pool.query(
+                const mov = await client.query(
                     `INSERT INTO movimentacoes_estoque 
                         (id_produto, tipo_movimentacao, quantidade, id_usuario_responsavel, observacao)
-                     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+                     VALUES ($1, $2, $3, $4, $5) 
+                     RETURNING *`,
                     [
                         produto.id_produto,
                         'entrada',
@@ -105,22 +121,36 @@ exports.createProduto = async (req, res) => {
                     ]
                 );
 
-                console.log('✅ Movimentação criada:', mov.rows[0].id_movimentacao);
+                console.log('✅ Movimentação inicial criada:', mov.rows[0].id_movimentacao);
             } catch (errMov) {
-                console.error('❌ Erro ao registrar movimentação de estoque:', errMov);
+                console.error('❌ Erro ao registrar movimentação de estoque inicial:', errMov);
+                // não dou rollback aqui, só log – mas se quiser pode transformar em erro fatal
             }
         } else {
             console.log('ℹ️ Produto criado com quantidade 0, não gera movimentação.');
         }
 
-        res.status(201).json(produto);
+        // Buscar produto já com estoque final (atualizado por trigger/lógica das movimentações)
+        const produtoAtualizadoQuery = await client.query(
+            'SELECT * FROM produtos WHERE id_produto = $1',
+            [produto.id_produto]
+        );
+
+        const produtoAtualizado = produtoAtualizadoQuery.rows[0];
+
+        await client.query('COMMIT');
+        res.status(201).json(produtoAtualizado);
+
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error("Erro ao criar produto:", error);
         res.status(500).json({ message: 'Erro no servidor.', error: error.message });
+    } finally {
+        client.release();
     }
 };
 
-
+// ATUALIZAR STATUS (ATIVO / INATIVO)
 exports.updateStatusProduto = async (req, res) => {
     try {
         const { id } = req.params;
@@ -135,13 +165,18 @@ exports.updateStatusProduto = async (req, res) => {
             [ativo, id]
         );
 
-        if (result.rowCount === 0) return res.status(404).json({ message: 'Produto não encontrado.' });
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Produto não encontrado.' });
+        }
+
         res.status(200).json(result.rows[0]);
     } catch (error) {
+        console.error("Erro ao atualizar status do produto:", error);
         res.status(500).json({ message: 'Erro no servidor.', error });
     }
 };
 
+// UPLOAD / TROCA DE IMAGEM
 exports.uploadImage = async (req, res) => {
     try {
         const { id } = req.params;
@@ -150,6 +185,7 @@ exports.uploadImage = async (req, res) => {
             return res.status(400).json({ message: 'Nenhum arquivo de imagem enviado.' });
         }
 
+        // buscar imagem antiga
         const oldImageQuery = await pool.query(
             'SELECT imagem_url FROM produtos WHERE id_produto = $1',
             [id]
@@ -171,6 +207,7 @@ exports.uploadImage = async (req, res) => {
                 }
             }
         }
+
         const newImageUrl = `/uploads/${req.file.filename}`;
 
         const updateQuery = await pool.query(
@@ -193,19 +230,19 @@ exports.uploadImage = async (req, res) => {
     }
 };
 
+// ATUALIZAR PRODUTO (INCLUIR AJUSTE DE ESTOQUE VIA MOVIMENTAÇÃO)
 exports.updateProduto = async (req, res) => {
-    // Usamos 'client' em vez de 'pool' direto para garantir a transação
     const client = await pool.connect();
     
     try {
         const { id } = req.params;
-        // Convertemos para Int para garantir cálculos matemáticos corretos
         const { nome, descricao, preco_venda, custo, quantidade_estoque, id_categoria } = req.body;
-        const novoEstoque = parseInt(quantidade_estoque);
 
-        await client.query('BEGIN'); // Inicia a transação
+        const novoEstoque = parseInt(quantidade_estoque, 10);
 
-        // 1. Buscar o estoque ATUAL antes da atualização
+        await client.query('BEGIN');
+
+        // 1. Buscar estoque atual
         const produtoAtualQuery = await client.query(
             'SELECT quantidade_estoque FROM produtos WHERE id_produto = $1',
             [id]
@@ -218,16 +255,20 @@ exports.updateProduto = async (req, res) => {
 
         const estoqueAntigo = produtoAtualQuery.rows[0].quantidade_estoque;
 
-        // 2. Atualizar o produto
-        const produtoAtualizado = await client.query(
+        // 2. Atualizar dados do produto (sem mexer no quantidade_estoque aqui!)
+        await client.query(
             `UPDATE produtos SET 
-                nome = $1, descricao = $2, preco_venda = $3, custo = $4, 
-                quantidade_estoque = $5, id_categoria = $6 
-             WHERE id_produto = $7 RETURNING *`,
-            [nome, descricao, preco_venda, custo, novoEstoque, id_categoria, id]
+                nome = $1, 
+                descricao = $2, 
+                preco_venda = $3, 
+                custo = $4, 
+                id_categoria = $5 
+             WHERE id_produto = $6`,
+            [nome, descricao, preco_venda, custo, id_categoria, id]
         );
 
-        if (novoEstoque !== estoqueAntigo) {
+        // 3. Se o estoque foi alterado, registra movimentação
+        if (!isNaN(novoEstoque) && novoEstoque !== estoqueAntigo) {
             const diferenca = novoEstoque - estoqueAntigo;
             const tipoMovimentacao = diferenca > 0 ? 'entrada' : 'saida';
             const quantidadeMovimentada = Math.abs(diferenca);
@@ -249,8 +290,14 @@ exports.updateProduto = async (req, res) => {
             console.log(`✅ Movimentação de ${tipoMovimentacao} registrada: ${quantidadeMovimentada} unidades.`);
         }
 
+        // 4. Buscar produto já com estoque atualizado pelo mecanismo de movimentações
+        const produtoComEstoqueAtualizado = await client.query(
+            'SELECT * FROM produtos WHERE id_produto = $1',
+            [id]
+        );
+
         await client.query('COMMIT');
-        res.status(200).json(produtoAtualizado.rows[0]);
+        res.status(200).json(produtoComEstoqueAtualizado.rows[0]);
 
     } catch (error) {
         await client.query('ROLLBACK');
@@ -261,6 +308,7 @@ exports.updateProduto = async (req, res) => {
     }
 };
 
+// EXPORTAR CÓDIGOS DE BARRAS EM PDF
 exports.exportarCodigosDeBarras = async (req, res) => {
     try {
         const result = await pool.query(
@@ -281,6 +329,7 @@ exports.exportarCodigosDeBarras = async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=codigos_de_barras.pdf');
         doc.pipe(res);
+
         doc.fontSize(16).text('Etiquetas de Código de Barras', { align: 'center' });
         doc.moveDown(2);
 
